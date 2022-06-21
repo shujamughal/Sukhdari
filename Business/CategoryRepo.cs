@@ -22,7 +22,7 @@ namespace Business
         }
         public async Task<int> createCategory(CategoryDTO category)
         {
-            var categories = await _db.Categories.FirstOrDefaultAsync(i => i.Name.ToLower() == category.Name.ToLower());
+            var categories = await _db.Categories.FirstOrDefaultAsync(i => i.Name.ToLower() == category.Name.ToLower() && i.StoreId == category.StoreId);
             if(category.Id == 0 && categories != null)
             {
                 return 0;
