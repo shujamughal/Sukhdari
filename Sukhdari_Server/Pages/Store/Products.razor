@@ -68,6 +68,12 @@
                                 <td>@product.Description</td>
                                 <td class="d-flex align-items-center justify-content-center  flex-column flex-md-row"
                             style="gap: 0.3rem;">
+                            <a href="@($"/productView/{product.Id}")">
+                                        <div class="btn btn-primary">
+
+                                            <span class="oi oi-eye"></span>
+                                        </div>
+                                    </a>
                                     <a href="@($"/product/update/{product.Id}")">
                                         <div class="btn btn-secondary">
 
