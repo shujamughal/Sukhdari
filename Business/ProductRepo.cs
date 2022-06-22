@@ -24,7 +24,7 @@ namespace Business
         }
         public async Task<ProductDTO> createProduct(ProductDTO product)
         {
-            var getValues = await _db.Products.FirstOrDefaultAsync(i => i.Name.ToLower() == product.Name.ToLower());
+            var getValues = await _db.Products.FirstOrDefaultAsync(i => i.Name.ToLower() == product.Name.ToLower() && i.StoreId == product.StoreId);
             if(product.Id == 0 && getValues != null )
             {
                 return null;

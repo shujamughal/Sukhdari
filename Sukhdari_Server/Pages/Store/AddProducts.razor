@@ -128,19 +128,26 @@
 
                     continue;
                 }
-
-                ProductDTO productDTO = new ProductDTO()
+                ProductDTO productDTO = new ProductDTO();
+                try
+                {
                     {
-                        Name = product[0],
-                        CategoryId = Categories.FirstOrDefault(i => i.Name.ToLower() == product[1].ToLower()).Id,
-                        Price = float.Parse(product[2]),
-                        DiscountPercentage = float.Parse(product[3]),
-                        Quantity = int.Parse(product[4]),
-                        Description = product[5],
-                        ClickCount = 0,
-                        StoreId = store_id
+                        productDTO.Name = product[0];
+                        productDTO.CategoryId = Categories.FirstOrDefault(i => i.Name.ToLower() == product[1].ToLower()).Id;
+                        productDTO.Price = float.Parse(product[2]);
+                        productDTO.DiscountPercentage = float.Parse(product[3]);
+                        productDTO.Quantity = int.Parse(product[4]);
+                        productDTO.Description = product[5];
+                        productDTO.ClickCount = 0;
+                        productDTO.StoreId = store_id;
 
                     };
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+
                 try
                 {
                     newProduct = await Product.createProduct(productDTO);
