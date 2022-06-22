@@ -27,13 +27,15 @@ namespace Business
             {
                 Store oldStore = await _db.Stores.FindAsync(store.Id);
                 oldStore.Name = store.Name;
-                
+                oldStore.Address = store.Address;
+
+                oldStore.phoneNo = store.phoneNo;
                 if (oldStore.Type != store.Type)
                 {
                     var storeTags = _db.storeTags.Where(i => i.storeId == store.Id).ToList();
-                    if(storeTags.Any())
+                    if (storeTags.Any())
                     {
-                        foreach(var tag in storeTags)
+                        foreach (var tag in storeTags)
                         {
                             _db.storeTags.Remove(tag);
                         }
@@ -42,7 +44,7 @@ namespace Business
                 }
                 oldStore.Country = store.Country;
                 oldStore.Image = store.Image;
-                if(oldStore.ClickCount != null)
+                if (oldStore.ClickCount != null)
                 {
                     oldStore.ClickCount = store.ClickCount;
                 }
@@ -57,6 +59,8 @@ namespace Business
             Store newStore = _mapper.Map<StoreDTO, Store>(store);
             newStore.UserId = storeAdminId;
             newStore.ClickCount = 0;
+            newStore.timeNow = DateTime.UtcNow.Date;
+
             await _db.Stores.AddAsync(newStore);
             await _db.SaveChangesAsync();
             return _mapper.Map<Store, StoreDTO>(newStore);
@@ -82,7 +86,7 @@ namespace Business
         }
         public async Task<IEnumerable<StoreDTO>> getAllStores()
         {
-        
+
             return _mapper.Map<IEnumerable<Store>, IEnumerable<StoreDTO>>(_db.Stores.Include(i => i.StoreImages));
 
         }
@@ -147,14 +151,28 @@ namespace Business
         }
         public async Task<int> clickStoreCount(int storeID)
         {
-            var store = _db.Stores.FirstOrDefault(i => i.Id == storeID);
-            if (store.ClickCount == null)
+            //var store = _db.Stores.FirstOrDefault(i => i.Id == storeID);
+            var StoreCount = _db.countDetails.FirstOrDefault(i => i.StoreId == storeID && i.date.Date == DateTime.Today.Date);
+
+
+            if (StoreCount != null)
             {
-                store.ClickCount = 1;
+                if (StoreCount.clicks == 0)
+                {
+                    StoreCount.clicks = 1;
+                }
+                else
+                {
+                    StoreCount.clicks++;
+                }
             }
             else
             {
-                store.ClickCount++;
+                CountDetails data = new CountDetails();
+                data.clicks = 1;
+                data.StoreId = storeID;
+                data.date = DateTime.Now.Date;
+                _db.countDetails.Add(data);
             }
             return await _db.SaveChangesAsync();
         }

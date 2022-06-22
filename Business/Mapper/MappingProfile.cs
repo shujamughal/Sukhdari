@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Business.Mapper
 {
-    public class MappingProfile:Profile
+    public class MappingProfile : Profile
     {
         public MappingProfile()
         {
@@ -22,6 +22,7 @@ namespace Business.Mapper
             CreateMap<TagType, TagTypeDTO>().ReverseMap();
             CreateMap<Tag, TagDTO>().ReverseMap();
             CreateMap<StoreTags, StoreTagDTO>().ReverseMap();
+            CreateMap<CountDetails, CountDetailsDTO>().ReverseMap();
         }
     }
 }

@@ -53,7 +53,8 @@ namespace Sukhdari_Server
             services.AddScoped<ITagRepo, TagRepo>();
             services.AddScoped<ITagTypeRepo, TagTypeRepo>();
             services.AddScoped<IStoreTagRepo, StoreTagRepo>();
-                 
+            services.AddScoped<ICountDetailsRepo, CountDetailsRepo>();
+
             services.AddHttpContextAccessor();
             services.AddRazorPages();
             services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
