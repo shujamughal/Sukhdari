@@ -1,10 +1,15 @@
-﻿@page "/stores/product/{Id:int}/{StoreId:int}"
-@layout StoreLayout
-@inject IStoreService Store
+﻿@page "/productView/{Id:int}"
+@inject IStoreRepo Store
+@inject IProductRepo Product
+@inject NavigationManager Navigator
+@using System.IO
+@using Sukhdari_Server.Service.IService
+@layout StoreAdminLayoutT
+@attribute [Authorize(Roles = Common.StaticDetails.Role_StoreAdmin)]
 
 <div class="col-11 card m-5">
     <div class="col-12 m-2">
-        <a href="@($"stores/store/{StoreId}")">
+        <a href="@($"products")">
             <h1 class="text-dark oi oi-circle-x"></h1>
         </a>
     </div>
@@ -110,7 +115,7 @@
                 <p>@specificProduct.Description</p>
             </div>
             <div>
-                <a href= @($"stores/store/{StoreId} class="btn btn-primary col-5">Close</a>
+                <a href= "@($"products")" class="btn btn-primary col-5">Close</a>
             </div>
         </div>
 
@@ -121,15 +126,25 @@
 {
     [Parameter]
     public int Id { get; set; }
-    [Parameter]
-    public int StoreId { get; set; }
+     [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
 
     public ProductDTO specificProduct { get; set; } = new ProductDTO();
     protected override async Task OnInitializedAsync()
     {
-        specificProduct = await Store.getSpecificProduct(StoreId, Id);
-        int categoryID = specificProduct.CategoryId;
-        Store.AddCategoryClickCount(categoryID);
-        Store.AddProductClickCount(Id);
+        var authState = await AuthenticationState;
+        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+        if (store == null)
+        {
+            Navigator.NavigateTo("/storeNotExist");
+        }
+        else{
+        var product = await Product.GetProduct(Id, store.Id);
+                if (product.ProductImages != null)
+                {
+                    product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
+                }
+                specificProduct = product;
+        }
     }
 }

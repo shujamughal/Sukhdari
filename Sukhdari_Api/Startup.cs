@@ -45,7 +45,8 @@ namespace Sukhdari_Api
             services.AddScoped<ITagTypeRepo, TagTypeRepo>();
             services.AddScoped<IStoreTagRepo, StoreTagRepo>();
             services.AddScoped<IUserIPRepo, UserIPRepo>();
-            
+            services.AddScoped<ICountDetailsRepo, CountDetailsRepo>();
+
             services.AddCors(o => o.AddPolicy("Sukhdari", builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
