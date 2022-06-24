@@ -1,8 +1,10 @@
 @inject IWebAssemblyHostEnvironment hostEnv
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <h3><a class="navbar-brand" href="/"><span class="oi oi-arrow-left btn btn-dark"></span></a></h3>
+@inject Microsoft.Extensions.Configuration.IConfiguration config
 
-    <h3><a class="navbar-brand" href="/">Sukhdari</a></h3>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <h3><a class="navbar-brand" href=@($"{@config["AppBasePath"]}")><span class="oi oi-arrow-left btn btn-dark"></span></a></h3>
+
+    <h3><a class="navbar-brand" href=@($"{@config["AppBasePath"]}")>Sukhdari</a></h3>
     
     <button class="navbar-toggler" type="button" data-toggle="collapse" 
             data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" 
@@ -15,13 +17,13 @@
 
         @if (hostEnv.IsDevelopment())
         {
-            <a class="nav-link" href="https://localhost:44301/Identity/Account/Register">Create Store</a>
-            <a class="nav-link" href="https://localhost:44301/Identity/Account/Login">Go to Store</a>
+            <a class="nav-link" href=@($"{@config["ServerBasePath"]}Identity/Account/Register")>Create Store</a>
+            <a class="nav-link" href=@($"{@config["ServerBasePath"]}Identity/Account/Login")>Go to Store</a>
         }
         else
         {
-            <a class="nav-link" href="https://sukhdariserverupdate.azurewebsites.net/Identity/Account/Register">Create Store</a>
-            <a class="nav-link" href="https://sukhdariserverupdate.azurewebsites.net/Identity/Account/Login">Go to Store</a>
+            <a class="nav-link" href=@($"{@config["ServerBasePath"]}Identity/Account/Register")>Create Store</a>
+            <a class="nav-link" href=@($"{@config["ServerBasePath"]}Identity/Account/Login")>Go to Store</a>
 
         }
 

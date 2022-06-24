@@ -1,6 +1,8 @@
 @page "/"
 @layout HomeLayout
 @inject IStoreService Store
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+
 <div id="carouselDiv" class="row p-0 m-0">
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
@@ -9,10 +11,10 @@
         </ol>
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img class="d-block w-100" src="images/slide1.jpg" alt="First slide">
+                <img class="d-block w-100" src=@($"{@config["AppBasePath"]}Images/slide1.jpg") alt="First slide">
             </div>
             <div class="carousel-item">
-                <img class="d-block w-100" src="images/slide2.png" alt="Second slide">
+                <img class="d-block w-100" src=@($"{@config["AppBasePath"]}Images/slide2.png") alt="Second slide">
             </div>
         </div>
         <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
@@ -179,8 +181,8 @@
                                 @if (imageIndex == 0)
                                  {
                                     <div class="carousel-item active">
-                                        <img class="card-img-top" src="@image.StoreImageUrl" onerror="this.src = '/Images/store.jpg';" alt="Product image cap" />
-                                        @if (array[store.Id] != 0)
+                                        <img class="card-img-top" src="@image.StoreImageUrl" onerror="@($"this.src = {@config["AppBasePath"]}Images/store.jpg;")" alt="Product image cap" />
+                                        @if (array[store.Id] != null)
                                         {
                                             <span class="card-batch">Upto @array[store.Id]%</span>
                                         }
@@ -190,7 +192,7 @@
                                  else
                                  {
                                     <div class="carousel-item">
-                                        <img class="card-img-top" src="@image.StoreImageUrl" onerror="this.src = '/Images/store.jpg';" alt="Product image cap" />
+                                        <img class="card-img-top" src="@image.StoreImageUrl" onerror="@($"this.src = {@config["AppBasePath"]}Images/store.jpg;")" alt="Product image cap" />
                                     </div>
                                  }
                                  imageIndex++;
@@ -200,7 +202,7 @@
                 @if (store.StoreImages.Count==0)
                 {
                     <div class="carousel-item active">
-                        <img class="card-img-top" src="/Images/store.jpg" onerror="this.src = '/Images/store.jpg';" alt="Product image cap" />
+                        <img class="card-img-top" src=$"{@config["AppBasePath"]}Images/store.jpg" onerror="@($"this.src = {@config["AppBasePath"]}Images/store.jpg;")" alt="Product image cap" />
                     </div>
                 }
 
