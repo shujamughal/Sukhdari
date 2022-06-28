@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Sukhdari_Api
 {
@@ -86,8 +87,11 @@ namespace Sukhdari_Api
             //    c.SwaggerEndpoint("/swagger/v2/swagger.json", "Sukhdari_Api v2");
             //    c.RoutePrefix = string.Empty;
             //});
-
-            app.UseHttpsRedirection();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+            //app.UseHttpsRedirection();
             app.UseCors("Sukhdari");
             app.UseRouting();
             app.UseAuthorization();
