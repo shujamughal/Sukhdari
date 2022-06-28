@@ -19,6 +19,8 @@ using System.Linq;
 using AutoMapper;
 using System.Threading.Tasks;
 using Syncfusion.Blazor;
+using Microsoft.AspNetCore.HttpOverrides;
+
 namespace Sukhdari_Server
 {
     public class Startup
@@ -78,8 +80,11 @@ namespace Sukhdari_Server
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+           // app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
