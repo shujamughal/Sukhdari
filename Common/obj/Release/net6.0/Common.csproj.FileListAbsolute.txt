@@ -1,0 +1,33 @@
+D:\Sukhdari-master-project\Sukhdari-master\Common\bin\Release\net6.0\Common.deps.json
+D:\Sukhdari-master-project\Sukhdari-master\Common\bin\Release\net6.0\Common.dll
+D:\Sukhdari-master-project\Sukhdari-master\Common\bin\Release\net6.0\Common.pdb
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.AssemblyInfoInputs.cache
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.AssemblyInfo.cs
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.csproj.CoreCompileInputs.cache
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.dll
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\refint\Common.dll
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\Common.pdb
+D:\Sukhdari-master-project\Sukhdari-master\Common\obj\Release\net6.0\ref\Common.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\bin\Release\net6.0\Common.deps.json
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\bin\Release\net6.0\Common.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\bin\Release\net6.0\Common.pdb
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.AssemblyInfoInputs.cache
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.AssemblyInfo.cs
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.csproj.CoreCompileInputs.cache
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\refint\Common.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\Common.pdb
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\Common\obj\Release\net6.0\ref\Common.dll
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\bin\Release\net6.0\Common.deps.json
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\bin\Release\net6.0\Common.dll
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\bin\Release\net6.0\Common.pdb
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.AssemblyInfoInputs.cache
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.AssemblyInfo.cs
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.csproj.CoreCompileInputs.cache
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.dll
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\refint\Common.dll
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\Common.pdb
+E:\Mian and Mega FYP Project\FYP (UPDATE)\Sukhdari (Local)\Common\obj\Release\net6.0\ref\Common.dll
