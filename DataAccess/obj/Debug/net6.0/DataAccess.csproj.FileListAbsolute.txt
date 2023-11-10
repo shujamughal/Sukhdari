@@ -1,0 +1,38 @@
+D:\Sukhdari-master\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.deps.json
+D:\Sukhdari-master\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.dll
+D:\Sukhdari-master\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.pdb
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.csproj.AssemblyReference.cache
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfoInputs.cache
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfo.cs
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.csproj.CoreCompileInputs.cache
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.dll
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\refint\DataAccess.dll
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.pdb
+D:\Sukhdari-master\Sukhdari-master\DataAccess\obj\Debug\net6.0\ref\DataAccess.dll
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.deps.json
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.dll
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\bin\Debug\net6.0\DataAccess.pdb
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.csproj.AssemblyReference.cache
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfoInputs.cache
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfo.cs
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.csproj.CoreCompileInputs.cache
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.dll
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\refint\DataAccess.dll
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\DataAccess.pdb
+D:\Sukhdari-master-project\Sukhdari-master\DataAccess\obj\Debug\net6.0\ref\DataAccess.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\bin\Debug\net6.0\DataAccess.deps.json
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\bin\Debug\net6.0\DataAccess.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\bin\Debug\net6.0\DataAccess.pdb
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.csproj.AssemblyReference.cache
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfoInputs.cache
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.AssemblyInfo.cs
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.csproj.CoreCompileInputs.cache
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\refint\DataAccess.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.pdb
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\ref\DataAccess.dll
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\bin\Debug\net6.0\DataAccess.runtimeconfig.json
+E:\Bilal's Data\PUCIT\Semester 7\FYP\Sukhdari (Local)\DataAccess\obj\Debug\net6.0\DataAccess.genruntimeconfig.cache
