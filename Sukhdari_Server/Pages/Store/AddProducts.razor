@@ -1,0 +1,212 @@
+﻿@page "/addProductsInBulk"
+@inject IStoreRepo Store
+@inject ICategoryRepo Category
+@inject IProductRepo Product
+@inject IProductImageRepo productImageRepo
+@using System.IO
+@using Sukhdari_Server.Service.IService
+@using CsvHelper
+@using System.Globalization
+@using System.Text.RegularExpressions
+@inject IImageUpload imageUplaod
+@inject NavigationManager Navigator
+@inject IJSRuntime JsRuntime
+@layout StoreAdminLayoutT
+@attribute [Authorize(Roles = Common.StaticDetails.Role_StoreAdmin)]
+
+
+
+
+<div class="card card-info mt-3">
+    <div class="card-header">
+        <div class="card-title float-left pt-2">
+            <h3>Add Products In Bulk</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div>
+            <span>Product Bulk Upload CSV Template</span>
+            <a href="/Format//BulkProductsTemplate.csv" class="btn btn-outline-success" download>Download Csv Template</a>
+        </div>
+        <div class="mt-5">
+            <span>Product Details CSV File</span>
+            <InputFile OnChange="@HandleCSVFileUpload" accept=".csv" class="form-control"></InputFile>
+        </div>
+        <div class="mt-5">
+            <span><h3>Product Images</h3></span>
+            <InputFile OnChange="@HandleImageUpload" multiple accept=".jpg,.jpeg,.png" class="form-control"></InputFile>
+        </div>
+        <button @onclick="@addProductsInBulk" class="btn btn-primary mt-3">Add</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
+    public IEnumerable<CategoryDTO> Categories { get; set; }
+
+    IReadOnlyList<IBrowserFile> uploadedImages;
+    IBrowserFile productDetailsCSV;
+    List<string[]> productsCsv = new List<string[]>();
+    int store_id;
+    IDictionary<string, IBrowserFile> productImagesHash = new Dictionary<string, IBrowserFile>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationState;
+
+        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+        if (store == null)
+        {
+            Navigator.NavigateTo("/storeNotExist");
+        }
+        else
+        {
+            store_id = store.Id;
+            Categories = await Category.GetAllCategories(store.Id);
+        }
+    }
+
+    public async Task HandleCSVFileUpload(InputFileChangeEventArgs e)
+    {
+        var singleFile = e.File;
+        var stream = singleFile.OpenReadStream();
+        productsCsv = new List<string[]>();
+        MemoryStream ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        stream.Close();
+
+        var outputFileString = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+        foreach (var item in outputFileString.Split(Environment.NewLine))
+        {
+            productsCsv.Add(SplitCSV(item.ToString()));
+        }
+        await JsRuntime.ToastrSuccess("Read");
+
+
+
+    }
+
+    //e.File.op
+    private string[] SplitCSV(string input)
+    {
+        //Excludes commas within quotes
+        Regex csvSplit = new Regex("(?:^|,)(\"(?:[^\"]+|\"\")*\"|[^,]*)", RegexOptions.Compiled);
+        List<string> list = new List<string>();
+        string curr = null;
+        foreach (Match match in csvSplit.Matches(input))
+        {
+            curr = match.Value;
+            if (0 == curr.Length) list.Add("");
+
+            list.Add(curr.TrimStart(','));
+        }
+
+        return list.ToArray();
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        uploadedImages = e.GetMultipleFiles();
+        foreach (var image in uploadedImages)
+        {
+            productImagesHash.Add(image.Name, image);
+        }
+    }
+
+    private async Task addProductsInBulk()
+    {
+        if (productsCsv.Count() > 0)
+        {
+            int index = 0;
+            foreach (var product in productsCsv)
+            {
+                var newProduct = new ProductDTO();
+                if (index++ == 0 || product == null || product.Count() <= 0)
+                {
+
+                    continue;
+                }
+                ProductDTO productDTO = new ProductDTO();
+                try
+                {
+                    {
+                        productDTO.Name = product[0];
+                        productDTO.CategoryId = Categories.FirstOrDefault(i => i.Name.ToLower() == product[1].ToLower()).Id;
+                        productDTO.Price = float.Parse(product[2]);
+                        productDTO.DiscountPercentage = float.Parse(product[3]);
+                        productDTO.Quantity = int.Parse(product[4]);
+                        productDTO.Description = product[5];
+                        productDTO.ClickCount = 0;
+                        productDTO.StoreId = store_id;
+
+                    };
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    newProduct = await Product.createProduct(productDTO);
+                }
+                catch (Exception e)
+                {
+                    if (newProduct.Name != null)
+                    {
+
+                        await JsRuntime.ToastrWarning("Error Adding product with Name: " + productDTO.Name);
+                    }
+                    else
+                    {
+
+                        await JsRuntime.ToastrError("Error adding some product!");
+                    }
+
+                }
+                if (newProduct == null)
+                {
+                    await JsRuntime.ToastrWarning("Product Already Exists");
+
+                }
+                else
+                {
+                    await JsRuntime.ToastrSuccess($"Product {productDTO.Name} Added Successfully");
+
+                    try
+                    {
+                        var productImagesNames = product[6].Split(":");
+                        if (productImagesNames != null && productImagesNames.Count() > 0)
+                        {
+                            foreach (var product_image_name in productImagesNames)
+                            {
+                                if (productImagesHash.ContainsKey(product_image_name))
+                                {
+
+                                    var image_url = await imageUplaod.uploadImage(productImagesHash[product_image_name]);
+                                    await productImageRepo.CreateProductImage(new ProductImageDTO()
+                                        {
+                                            ProductId = newProduct.Id,
+                                            ProductImageUrl = image_url
+                                        });
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        await JsRuntime.ToastrError($"Error Uploading pictures for {productDTO.Name}!");
+                    }
+
+                }
+            }
+        }
+        else
+        {
+            await JsRuntime.ToastrError("Some Error Occured.Check valid CSV is uploaded!");
+        }
+    }
+        }
