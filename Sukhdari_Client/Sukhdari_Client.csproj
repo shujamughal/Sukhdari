@@ -25,10 +25,10 @@
   </ItemGroup>
 
 
-	<!--<ItemGroup>
+	<ItemGroup>
 		<BlazorWebAssemblyLazyLoad Include="System.Private.Xml.dll" />
 		<BlazorWebAssemblyLazyLoad Include="System.Data.Common.dll" />
 		<BlazorWebAssemblyLazyLoad Include="Newtonsoft.Json.dll" />
 		<BlazorWebAssemblyLazyLoad Include="System.Linq.Expressions.dll" />
-	</ItemGroup>-->
+	</ItemGroup>
 </Project>
