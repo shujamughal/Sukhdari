@@ -24,7 +24,6 @@
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
-
 	<ItemGroup>
 		<BlazorWebAssemblyLazyLoad Include="System.Private.Xml.dll" />
 		<BlazorWebAssemblyLazyLoad Include="System.Data.Common.dll" />
