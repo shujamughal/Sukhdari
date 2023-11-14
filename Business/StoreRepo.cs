@@ -184,6 +184,45 @@ namespace Business
             }
             return await _db.SaveChangesAsync();
         }
+
+
+
+
+
+
+
+
+
+        public async Task<StoreDTO> getStoreById(int storeId)
+        {
+            // Replace this with your actual DbContext and entity type
+            var storeEntity = await _db.Stores.FindAsync(storeId);
+
+            if (storeEntity == null)
+            {
+                // Handle the case where the store with the given ID is not found
+                return null;
+            }
+
+            // Use AutoMapper to map the StoreEntity to StoreDTO
+            var storeDto = _mapper.Map<StoreDTO>(storeEntity);
+
+            return storeDto;
+        }
+
+
+        public async Task<String> getEmailByUserId(string userId)
+        {
+            var result = _db.Users.FirstOrDefault(i => i.Id == userId);
+            var email = result.Email;
+            return email;
+        }
+
+
+
+
+
+
     }
 }
 

@@ -20,6 +20,8 @@ namespace Business.IRepo
         public Task<int> getStoreCount();
         public Task<int> clickStoreCount(int storeID);
 
+        public Task<StoreDTO> getStoreById(int storeId);
+        public Task<String> getEmailByUserId(string userId);
 
     }
 }
