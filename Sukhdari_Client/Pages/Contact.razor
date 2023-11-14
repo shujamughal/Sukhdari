@@ -9,18 +9,37 @@
         </a>
     </div>
 
-    <div class="">
-        <h1>Phone #</h1>
-        <p>0300 0000000</p>
-        <h1>Email</h1>
-        <p>sukhdariinfo@gmail.com</p>
-        <h1>Location</h1>
-        <p>and here we will show the store address</p>
-    </div>
+
+         @if(Stores!=null)
+        {
+        <div class="">
+            <h1>Phone #</h1>
+            <p>@Stores.phoneNo</p>
+
+            <h1>Email</h1>
+            <p>@email</p>
+            <h1>Location</h1>
+            <p>@Stores.Address</p>
+
+        </div>
+
+        }
+
+
 </div>
 
 @code
 {
     [Parameter]
     public int StoreId { get; set; }
+
+    private StoreDTO Stores;
+    public string email { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Stores = await Store.GetStoreByIdAsync(StoreId);
+        email = await Store.getEmailByUserId(Stores.UserId);
+    }
+
 }
