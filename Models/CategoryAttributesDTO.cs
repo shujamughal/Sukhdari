@@ -12,6 +12,7 @@ namespace Models
     {
         [Required]
         public string Key { get; set; } //It's the attribute name
+
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
         public CategoryDTO Category { get; set; }

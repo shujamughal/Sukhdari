@@ -24,7 +24,6 @@ namespace Models
         public float Price { get; set; }
         public string Image { get; set; }
         public int CategoryId { get; set; }
-
         public int StoreId { get; set; }
         [Range(0, 100, ErrorMessage = "Discount value must be from 0 to 100")]
         public float? DiscountPercentage { get; set; }

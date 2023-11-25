@@ -24,11 +24,15 @@ namespace Models
         public int ClickCount { get; set; }
 
         public string Address { get; set; }
-        [MaxLength(12)]
+        public string? Description { get; set; }
+
+        [Required]
+        [RegularExpression(@"^[0-9]{4}-[0-9]{7}$", ErrorMessage = "Phone number must follow the pattern 'XXXX-XXXXXXX'.")]
         public string phoneNo { get; set; }
         public virtual ICollection<StoreImageDTO> StoreImages { get; set; }
         public virtual ICollection<StoreAttributesDTO> Attributes { get; set; }
         public List<string> ImageUrls { get; set; }
 
+        public string UserId { get; set; }
     }
 }
