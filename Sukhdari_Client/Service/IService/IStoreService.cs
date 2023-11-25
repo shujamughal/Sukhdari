@@ -26,5 +26,11 @@ namespace Sukhdari_Client.Service.IService
         public void AddProductClickCount(int productID);
         public Task<IEnumerable<StoreDTO>> getStoresByTags(string tagName);
         public Task<IEnumerable<StoreTagDTO>> getAllStoreTags();
+
+        //my code
+        public Task<StoreDTO> GetStoreByIdAsync(int storeId);
+        public Task<String> getEmailByUserId(string userId);
+        //my added code
+
     }
 }

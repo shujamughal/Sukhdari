@@ -135,5 +135,25 @@ namespace Sukhdari_Client.Service
             var stores = JsonConvert.DeserializeObject<IEnumerable<StoreTagDTO>>(content);
             return stores;
         }
-    }
+        // I am adding code
+
+        public async Task<StoreDTO> GetStoreByIdAsync(int storeId)
+        {
+            var response = await _httpClient.GetAsync($"api/Store/GetStoreById/{storeId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Assuming the API returns a single StoreDTO for the given ID
+            var store = JsonConvert.DeserializeObject<StoreDTO>(content);
+
+            return store;
+        }
+
+        public async Task<String> getEmailByUserId(string userId)
+        {
+            var response = await _httpClient.GetAsync($"api/Store/GetEmailByUserId/{userId}");
+            var email = await response.Content.ReadAsStringAsync();
+            return email;
+        }
+}
+        
 }

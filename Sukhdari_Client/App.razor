@@ -27,7 +27,7 @@
             if (true)
             {
                var assemblies = await AssemblyLoader.LoadAssembliesAsync(
-                    new[] { "System.Private.Xml.dll", "System.Data.Common.dll", "Newtonsoft.Json.dll", "System.Linq.Expressions.dll" }
+                       new[] { "System.Private.Xml.wasm", "System.Data.Common.wasm", "Newtonsoft.Json.wasm", "System.Linq.Expressions.wasm" }
                 );
                 lazyLoadedAssemblies.AddRange(assemblies);
                 
