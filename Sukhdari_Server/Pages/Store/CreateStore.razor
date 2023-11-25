@@ -373,14 +373,15 @@
     <div class="form-group">
         <label class="col-md-7 control-label" for="ph_no">Phone No.</label>
         <div class="col-md-7">
-            <InputText type="tel" id="ph_no" name="ph_no" placeholder="xxxx-xxxxxxx" class="form-control input-md" pattern="[0-9]{4}-[0-9]{7}" @bind-Value="StoreDetails.phoneNo" />
+            <InputText type="tel" id="ph_no" name="ph_no" placeholder="xxxx-xxxxxxx" class="form-control input-md" @bind-Value="StoreDetails.phoneNo" />
+            <ValidationMessage For="()=>StoreDetails.phoneNo"></ValidationMessage>
         </div>
     </div>
 
     <div class="form-group">
         <label class="col-md-7 control-label" for="store_description">STORE DESCRIPTION</label>
         <div class="col-md-7">
-            <textarea id="store_description" name="store_description" placeholder="Write brief introduction of your store" class="form-control input-md" /> @*change textarea with inputtextarea when bind-value is available*@
+            <InputTextArea id="store_description" @bind-Value="StoreDetails.Description" name="store_description" placeholder="Write brief introduction of your store" class="form-control input-md" /> @*change textarea with inputtextarea when bind-value is available*@
         </div>
     </div>
 
@@ -581,6 +582,7 @@
             Tags = await TagRepo.getTypeTags(typeID);
             StoreDetails = store;
             StoreDetails.AdminName = authState.User.Identity.Name;
+            //StoreDetails.Description = "Write store description here";
         }
         StoreDetails.AdminName = adminName;
     }

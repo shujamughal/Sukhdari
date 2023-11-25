@@ -59,7 +59,7 @@ namespace Sukhdari_Server
 
             services.AddHttpContextAccessor();
             services.AddRazorPages();
-            services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
+            services.AddSyncfusionBlazor(/*options => { options.IgnoreScriptIsolation = true; }*/);
             services.AddHttpContextAccessor();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();

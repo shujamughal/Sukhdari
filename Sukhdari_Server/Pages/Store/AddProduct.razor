@@ -54,7 +54,6 @@
 
 
             <!-- Display category attributes -->
-
             @if (ProductDetails.Attributes!= null && ProductDetails.Attributes.Count > 0)
             {
                 @foreach (var attrib in ProductDetails.Attributes)
@@ -62,12 +61,11 @@
                     if(attrib.Fixed == true)
                     {
                         <div class="form-group">
-                            <label class="col-md-7 control-label" for="product_categorie">@attrib.Key </label>
+                            <label class="col-md-7 control-label">@attrib.Key</label>
                             <div class="col-md-7">
-                                <InputText required id="AttributeValue" @bind-Value="@attrib.Value" placeholder="VALUE" class="form-control input-md" /> <!nbsp></!nbsp>
+                                <InputText required @bind-Value="@attrib.Value" placeholder="VALUE" class="form-control input-md" />
                             </div>
-                        </div>
-                        <br/>
+                        </div>                        
                     }
                 }
             }
@@ -130,7 +128,7 @@
             {
                 @foreach(var attrib in ProductDetails.Attributes)
                 {
-                    @if(attrib.Fixed == false)
+                    if(attrib.Fixed == false)
                     {
                         <div class="col-md-8">
                             <div class="input-group">
@@ -142,7 +140,7 @@
                                 </div>
                             </div>
                         </div>
-                        <br />
+                        <br />                     
                     }
                 }
             }
@@ -152,6 +150,7 @@
                     <button type="button" class="btn btn-info" @onclick="AddAttribute">Add Attribute</button>
                 </div>
             </div>
+
             @*New Code Ends here*@
 
             <div class="form-group">
@@ -261,6 +260,11 @@
             {
                 if (ProductDetails.Attributes != null && ProductDetails.Attributes.Count > 0)
                 {
+                    // var oldAttributes = ProductDetails.Attributes.Where(i => i.Fixed == true).ToList();
+                    // foreach (var attrib in oldAttributes)
+                    // {
+                    //     ProductDetails.Attributes.Remove(attrib);
+                    // }
                     ProductDetails.Attributes.Clear();
                 }
                 foreach(var attribute in Attributes)
@@ -435,11 +439,11 @@
         if(ProductDetails.Attributes == null)
         {
             ProductDetails.Attributes = new List<ProductAttributesDTO>();
-            ProductDetails.Attributes.Add(new ProductAttributesDTO(){Fixed=false});
+            ProductDetails.Attributes.Add(new ProductAttributesDTO() {Fixed=false});
         }
         else
         {
-            ProductDetails.Attributes.Add(new ProductAttributesDTO());
+            ProductDetails.Attributes.Add(new ProductAttributesDTO() { Fixed = false });
         }
     }
 }
