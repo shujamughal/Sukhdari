@@ -14,11 +14,8 @@ namespace DataAccess.Data
         public int Id { get; set; }
         public string Key { get; set; } //It's the attribute name
 
-  
-
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        private List<CategoryAttributes> Attributes { get; set; } = new List<CategoryAttributes>();
         public Category Category { get; set; }
 
     }

@@ -28,6 +28,7 @@ namespace DataAccess.Data
         [MaxLength(12)]
         public string phoneNo { get; set; }
         public int ClickCount { get; set; }
+        public string? Description { get; set; }
         public virtual ICollection<StoreImage> StoreImages { get; set; }
         public virtual ICollection<StoreAttributes> Attributes { get; set; }
     }

@@ -14,7 +14,6 @@ namespace DataAccess.Data
         public int AttributeId { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
-
         public bool Fixed { get; set; }
 
         [ForeignKey("Product")]
