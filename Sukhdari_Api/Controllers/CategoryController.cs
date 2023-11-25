@@ -71,13 +71,5 @@ namespace Sukhdari_Api.Controllers
             var res = await _categoryRepo.clickCategoryCount(categoryID);
             return Ok();
         }
-
-        //[HttpGet("AllAttributes/{categoryId}")]
-        //public async Task<IActionResult> GetCategoryAttributes(int categoryId)
-        //{
-        //    var categoryAttributes = await _categoryRepo.GetCategoryAttributes(categoryId);
-        //    return Ok(categoryAttributes);
-        //}
-
     }
 }

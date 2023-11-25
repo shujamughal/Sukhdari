@@ -1,4 +1,5 @@
 ﻿using Business.IRepo;
+using DataAccess.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -85,5 +86,30 @@ namespace Sukhdari_Api.Controllers
             var res = await _countDetailsRepo.getWeeklyTopStores();
             return Ok(res);
         }
+        // my code
+        [HttpGet("{storeId}")]
+        public async Task<IActionResult> GetStoreById(int storeId)
+        {
+            var store = await _storeRepo.getStoreById(storeId);
+
+            if (store == null)
+            {
+                return BadRequest(new ErrorModelDTO()
+                {
+                    ErrorMessage = "No such Store Exist",
+                    Title = "",
+                    StatusCode = StatusCodes.Status404NotFound
+                });
+            }
+
+            return Ok(store);
+        }
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetEmailByUserId(string userId)
+        {
+            var email = await _storeRepo.getEmailByUserId(userId);
+            return Ok(email);
+        }
+        // my code end
     }
 }
