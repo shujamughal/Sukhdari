@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business.IRepo;
 using DataAccess.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models;
 
@@ -27,18 +28,18 @@ namespace Business
             {
                 return 0;
             }
-            
             else if (category.Id != 0)
             {
                 var oldCategory = _db.Categories.Include(i=> i.Attributes).FirstOrDefault(i => i.Id == category.Id);
-                if (categories != null && oldCategory.Name.ToLower() == category.Name.ToLower())
-                {
-                    oldCategory.Name = category.Name;
-                }
-                else if (categories != null && oldCategory.Name.ToLower() != category.Name.ToLower())
-                {
-                    return 0;
-                }
+                //if (categories != null && oldCategory.Name.ToLower() == category.Name.ToLower())
+                //{
+                //    oldCategory.Name = category.Name;
+                //}
+                //else if (categories != null && oldCategory.Name.ToLower() != category.Name.ToLower())
+                //{
+                //    return 0;
+                //}
+                oldCategory.Name = category.Name;
                 oldCategory.Description = category.Description;
                 if (category.DiscountPercentage >= 0 && category.DiscountPercentage <= 100)
                 {
@@ -182,6 +183,5 @@ namespace Business
             }
             return await _db.SaveChangesAsync();
         }
-        
     }
 }

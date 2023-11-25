@@ -60,7 +60,7 @@ namespace Business
                 oldCategory.Attributes.Clear(); //It'll clear all existing attributes
                 foreach (var attrib in product.Attributes)
                 {
-                    ProductAttributes attribute = new ProductAttributes() { Key = attrib.Key, Value = attrib.Value };
+                    ProductAttributes attribute = new ProductAttributes() { Key = attrib.Key, Value = attrib.Value, Fixed=attrib.Fixed };
                     oldCategory.Attributes.Add(attribute);
                 }
 

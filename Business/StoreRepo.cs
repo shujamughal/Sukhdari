@@ -44,6 +44,7 @@ namespace Business
                 }
                 oldStore.Country = store.Country;
                 oldStore.Image = store.Image;
+                oldStore.Description = store.Description;
                 if (oldStore.ClickCount != null)
                 {
                     oldStore.ClickCount = store.ClickCount;
@@ -95,7 +96,7 @@ namespace Business
         public async Task<IEnumerable<StoreDTO>> getAllStores()
         {
 
-            return _mapper.Map<IEnumerable<Store>, IEnumerable<StoreDTO>>(_db.Stores.Include(i => i.StoreImages));
+            return _mapper.Map<IEnumerable<Store>, IEnumerable<StoreDTO>>(_db.Stores.Include(i => i.StoreImages).Include(i=>i.Attributes));
 
         }
         public StoreDTO GetStoreByAdminName(string adminName)
