@@ -8,6 +8,7 @@
 @using CsvHelper
 @using System.Globalization
 @using System.Text.RegularExpressions
+@using System.Text;
 @inject IImageUpload imageUplaod
 @inject NavigationManager Navigator
 @inject IJSRuntime JsRuntime
@@ -23,11 +24,36 @@
             <h3>Add Products In Bulk</h3>
         </div>
     </div>
+    @* //-----------------MyCode started------------------------*@
+    @* Select Category *@
     <div class="card-body">
+    <EditForm Model="ProductDetails" class="form-horizontal">
+        <div class="form-group">
+            <label class="col-md-7 control-label" for="product_categorie">PRODUCT CATEGORY</label>
+            <div class="col-md-7">
+                @* <InputSelect @bind-Value="ProductDetails.CategoryId" class="form-control" @oninput="HandleCategoryChange"> *@
+                <InputSelect @bind-Value="selected_category" TValue="string" class=" form-control" @oninput="HandleCategoryChange">
+                    <option >Select category</option>
+                    @foreach (var category in Categories)
+                    {
+                       <option value="@category.Id">@category.Name</option>
+                    }
+                </InputSelect>
+                @* <ValidationMessage For="()=>ProductDetails.CategoryId"></ValidationMessage> *@
+            </div>
+        </div>
+    </EditForm>
+    </div>
+    @* //------------------My Code Ended------------------------*@
+
+
+    <div class="card-body">
+
         <div>
             <span>Product Bulk Upload CSV Template</span>
             <a href="/Format//BulkProductsTemplate.csv" class="btn btn-outline-success" download>Download Csv Template</a>
         </div>
+
         <div class="mt-5">
             <span>Product Details CSV File</span>
             <InputFile OnChange="@HandleCSVFileUpload" accept=".csv" class="form-control"></InputFile>
@@ -44,7 +70,14 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; }
     public IEnumerable<CategoryDTO> Categories { get; set; }
-
+    // myCode Start
+    public CategoryDTO CategoryDetails { get; set; } = new CategoryDTO();
+    private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>();
+    public string selected_category;
+    public ProductDTO ProductDetails { get; set; } = new ProductDTO();
+    public List<string> commonAttributes = new List<string> { "Product_Name", "Product_Category", "Product_Price", "Discount_Percentage", "Available_Quantity", "Product_Description", "Product_Images" };
+    public List<string> columnsInCSV = new List<string> ();
+    //myCode End
     IReadOnlyList<IBrowserFile> uploadedImages;
     IBrowserFile productDetailsCSV;
     List<string[]> productsCsv = new List<string[]>();
@@ -65,8 +98,73 @@
             store_id = store.Id;
             Categories = await Category.GetAllCategories(store.Id);
         }
-    }
 
+    }
+    //-----------------My code Started to select specific category---------------------
+    private void HandleCategoryChange(ChangeEventArgs e)
+    {
+
+        int selectedCategoryId;
+
+
+        if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
+        {
+            foreach (var category in Categories)
+            {
+                if (category.Id == selectedCategoryId)
+                {
+                    Attributes = category.Attributes;
+                }
+            }
+        }
+        if (Attributes != null)
+        {
+            columnsInCSV.Clear();
+            //columnsInCSV = commonAttributes;
+            columnsInCSV.AddRange(commonAttributes);
+            foreach (var attrib in Attributes)
+            {
+                columnsInCSV.Add(attrib.Key.ToString());
+            }
+
+        }
+
+
+        var csvContent = new StringBuilder();
+
+        // Add column names in the first row
+        //csvContent.AppendLine("\"ProductName\",\"Price\",\"Quantity\",\"Discount\"");
+        // foreach(var column in columnsInCSV)
+        // {
+        //     csvContent.AppendLine(column);
+        // }
+        var columnsLine = string.Join(",", columnsInCSV);
+        csvContent.AppendLine(columnsLine);
+        // Add data rows
+        // foreach (var product in products)
+        // {
+        //     csvContent.AppendLine($"\"{product.ProductName}\",{product.Price},{product.Quantity},\"{product.Description}\"");
+        // }
+
+        // Path to the wwwroot/Format directory
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Format");
+
+        // Ensure the directory exists
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+
+        // Path to the BulkProductsTemplate.csv file
+        //var filePath = Path.Combine(directoryPath, "BulkProductsTemplate.csv");
+        var filePath = Path.Combine(directoryPath, "BulkProductsTemplate.csv");
+
+        // Write the CSV content to the file
+        File.WriteAllTextAsync(filePath, csvContent.ToString());
+
+
+    }
+    //---------------------My code Ended-------------------------
     public async Task HandleCSVFileUpload(InputFileChangeEventArgs e)
     {
         var singleFile = e.File;
@@ -83,9 +181,6 @@
             productsCsv.Add(SplitCSV(item.ToString()));
         }
         await JsRuntime.ToastrSuccess("Read");
-
-
-
     }
 
     //e.File.op
@@ -106,6 +201,8 @@
         return list.ToArray();
     }
 
+
+
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
         uploadedImages = e.GetMultipleFiles();
@@ -114,6 +211,7 @@
             productImagesHash.Add(image.Name, image);
         }
     }
+
 
     private async Task addProductsInBulk()
     {
@@ -125,26 +223,40 @@
                 var newProduct = new ProductDTO();
                 if (index++ == 0 || product == null || product.Count() <= 0)
                 {
-
                     continue;
                 }
-                ProductDTO productDTO = new ProductDTO();
+                var productDTO = new ProductDTO();
                 try
                 {
-                    {
-                        productDTO.Name = product[0];
-                        productDTO.CategoryId = Categories.FirstOrDefault(i => i.Name.ToLower() == product[1].ToLower()).Id;
-                        productDTO.Price = float.Parse(product[2]);
-                        productDTO.DiscountPercentage = float.Parse(product[3]);
-                        productDTO.Quantity = int.Parse(product[4]);
-                        productDTO.Description = product[5];
-                        productDTO.ClickCount = 0;
-                        productDTO.StoreId = store_id;
 
-                    };
+                    var cat = Categories.FirstOrDefault(i => i.Name.ToLower() == product[1].ToLower());
+                    productDTO.CategoryId = cat.Id;
+                    productDTO.Name = product[0];
+                    productDTO.Price = float.Parse(product[2]);
+                    productDTO.DiscountPercentage = float.Parse(product[3]);
+                    productDTO.Quantity = int.Parse(product[4]);
+                    productDTO.Description = product[5];
+                    productDTO.ClickCount = 0;
+                    productDTO.StoreId = store_id;
+
+                    int i = 7;
+                    foreach (var attrb in cat.Attributes)
+                    {
+                        var attrib = new ProductAttributesDTO { Key = attrb.Key, Value = product[i++], Fixed = true };
+                        if (productDTO.Attributes == null)
+                        {
+                            productDTO.Attributes = new List<ProductAttributesDTO>();
+                            productDTO.Attributes.Add(attrib);
+                        }
+                        else
+                        {
+                            productDTO.Attributes.Add(attrib);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
+                    await JsRuntime.ToastrWarning("Error during Product Addition: "+e.Message);
                     continue;
                 }
 
@@ -152,7 +264,7 @@
                 {
                     newProduct = await Product.createProduct(productDTO);
                 }
-                catch (Exception e)
+                catch (Exception )
                 {
                     if (newProduct.Name != null)
                     {
@@ -196,7 +308,7 @@
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception )
                     {
                         await JsRuntime.ToastrError($"Error Uploading pictures for {productDTO.Name}!");
                     }
@@ -209,4 +321,4 @@
             await JsRuntime.ToastrError("Some Error Occured.Check valid CSV is uploaded!");
         }
     }
-        }
+}

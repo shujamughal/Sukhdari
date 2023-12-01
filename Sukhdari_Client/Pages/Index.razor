@@ -334,29 +334,27 @@
     public int[] discountList = { 25, 50, 75 };
     int min = 0;
     int max = 10000;
+
     //MyCode Starts
-
-
-
-
     public List<string> Attributes { get; set; } = new List<string>(); //It'll store attributes of all stores
     public List<StoreAttributesDTO> selectedAttributes = new List<StoreAttributesDTO>(); // To store IDs of Attributes which the user have selected
     public List<String> AttributeValues { get; set; } = new List<string>(); //To avoid duplicate attribute values
     public IEnumerable<StoreDTO> ParticularTypeStores { get; set; } = new List<StoreDTO>(); //To hold the stores of particular store type
     //My code ends here
     //MyCode ends
+
     public string StphoneNo { get; set; }
     public string StAddress { get; set; }
     public string StDescrition { get; set; }
     public string email { get; set; }
-    public StoreDTO StoreClicked;
     private bool IsAboutVisible { get; set; } = false;
     private bool IsContactVisible { get; set; } = false;
 
     private async Task OpenDialogAbout(int storeId)
     {
-        StDescrition = AllStores.FirstOrDefault(i => i.Id == storeId).Description;
-        StAddress = AllStores.FirstOrDefault(i => i.Id == storeId).Address;
+        var storeClicked = AllStores.FirstOrDefault(i => i.Id == storeId);
+        StDescrition = storeClicked.Description;
+        StAddress = storeClicked.Address;
 
         this.IsAboutVisible = true;
     }
@@ -364,10 +362,10 @@
 
     private async Task OpenContactDialog(int storeId)
     {
-        StphoneNo = AllStores.FirstOrDefault(i => i.Id == storeId).phoneNo;
-        StAddress = AllStores.FirstOrDefault(i => i.Id == storeId).Address;
-        StoreClicked = AllStores.FirstOrDefault(i => i.Id == storeId);
-        email = await Store.getEmailByUserId(StoreClicked.UserId);
+        var storeClicked = AllStores.FirstOrDefault(i => i.Id == storeId);
+        StphoneNo = storeClicked.phoneNo;
+        StAddress = storeClicked.Address;
+        email = await Store.getEmailByUserId(storeClicked.UserId);
         this.IsContactVisible = true;
     }
     //My Code
@@ -376,7 +374,8 @@
     protected override async Task OnInitializedAsync()
     {
         Stores = await Store.getAllStores();
-        AllStores = await Store.getAllStores();
+        //AllStores = await Store.getAllStores();
+        AllStores = Stores;
         FilteredStores = Stores;
         AllTags = await Store.getAllStoreTags();
 
