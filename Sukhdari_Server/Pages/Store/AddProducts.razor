@@ -62,13 +62,27 @@
             <div class="mt-5">
                 <span><h3>Product Images</h3></span>
                 <InputFile OnChange="@HandleImageUpload" multiple accept=".jpg,.jpeg,.png" class="form-control"></InputFile>
+                <div class="note mt-2">
+                    <strong class="d-block mb-2"><em>Note:</em></strong>
+                    <ol class="ml-4" style="font-weight: normal; color: Gray; font-size: 0.7em; FONT-FAMILY: open_sansregular, Verdana,Arial, Helvetica, sans-serif; font-style:italic">
+                        <li>Valid image formats are .jpg, .jpeg, .png</li>
+                        <li>The size of each image must not exceed 250 KB, <br> else it'll be discarded</li>
+                    </ol>
+                </div>
             </div>
-            <button @onclick="@addProductsInBulk" class="btn btn-primary mt-3">Add</button>
+            <button @onclick="@addProductsInBulk" class="btn btn-primary mt-3" disabled="@(!AreAllImagesUploaded)">Add</button>
             @if (errorFileButtonFlag == 1)
             {
                 <div class="mt-5">
                     <span>Products failed to add</span>
                     <a href="/Format//ProductsFailed.csv" class="btn btn-outline-success" download>Download</a>
+                </div>
+            }
+            @if (errorImageButtonFlag == 1)
+            {
+                <div class="mt-5">
+                    <span>Images failed to add</span>
+                    <a href="/Format//FailedImages.csv" class="btn btn-outline-success" download>Download</a>
                 </div>
             }
         }
@@ -81,7 +95,9 @@
     public Task<AuthenticationState> AuthenticationState { get; set; }
     public IEnumerable<CategoryDTO> Categories { get; set; }
     // myCode Start
+    public bool AreAllImagesUploaded { get; set; } = true;
     public int errorFileButtonFlag = 0;
+    public int errorImageButtonFlag = 0;
     public CategoryDTO CategoryDetails { get; set; } = new CategoryDTO();
     private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>();
     public string selected_category = null;
@@ -181,6 +197,23 @@
     //---------------------My code Ended-------------------------
     public async Task HandleCSVFileUpload(InputFileChangeEventArgs e)
     {
+        string fileExtension = Path.GetExtension(e.File.Name);
+        if(fileExtension.ToLower() != ".csv")
+        {
+            await JsRuntime.ToastrError("Kindly upload valid CSV file");
+            return;
+        }
+
+        //---(Start)---If failed product file exists then clear the contects of this file before adding the new products.
+        var ErrorFileContentClear = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Format", "ProductsFailed.csv");
+        if (File.Exists(ErrorFileContentClear))
+        {
+            errorFileButtonFlag = 0;
+            System.IO.File.WriteAllText(ErrorFileContentClear, string.Empty);
+
+        }
+        //----(End)------If failed product file exists then clear the contects of this file before adding the new products.
+
         fileUploaded = true;
         var singleFile = e.File;
         var stream = singleFile.OpenReadStream();
@@ -220,17 +253,71 @@
         return list.ToArray();
     }
 
-
-
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
-        uploadedImages = e.GetMultipleFiles();
+        //Erasing the existing file content
+        var ErrorFileContentClear = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Format", "FailedImages.csv");
+        if (File.Exists(ErrorFileContentClear))
+        {
+            errorImageButtonFlag = 0;
+            System.IO.File.WriteAllText(ErrorFileContentClear, string.Empty);
+
+        }
+
+        AreAllImagesUploaded = false;
+
+        uploadedImages = e.GetMultipleFiles(1000);
+
+        // StringBuilder to store CSV content
+        var csvContent = new StringBuilder();
+        csvContent.AppendLine("\"Product_Name\",\"Error\"");
+
+        // List to store information about invalid images
+        List<string> invalidImages = new List<string>();
+
         foreach (var image in uploadedImages)
         {
-            productImagesHash.Add(image.Name, image);
+            if (image.Size / 1024 <= 250)
+            {
+                string fileExtension = Path.GetExtension(image.Name);
+                if (fileExtension.ToLower() == ".jpg" || fileExtension.ToLower() == ".png" || fileExtension.ToLower() == ".jpeg")
+                {
+                    if (!productImagesHash.ContainsKey(image.Name))
+                        productImagesHash.Add(image.Name, image);
+                }
+                else
+                {
+                    errorImageButtonFlag = 2;
+                    invalidImages.Add($"{image.Name},Invalid Format");
+                }
+            }
+            else
+            {
+                errorImageButtonFlag = 2;
+                invalidImages.Add($"{image.Name},File size exceeds 250 KB");
+            }
         }
-    }
 
+        // Append invalid image information to CSV content
+        csvContent.AppendLine(string.Join(Environment.NewLine, invalidImages));
+
+        // Directory path
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Format");
+
+        // Create the directory if it doesn't exist
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+
+        // File path
+        var filePath = Path.Combine(directoryPath, "FailedImages.csv");
+
+        // Write CSV content to the file
+        File.WriteAllText(filePath, csvContent.ToString());
+
+        AreAllImagesUploaded = true;
+    }
 
     private async Task addProductsInBulk()
     {
@@ -239,6 +326,10 @@
             await JsRuntime.ToastrError("Kindly upload the product file first.");
             return;
         }
+
+
+
+        AreAllImagesUploaded = false;
 
         string errorMsg = "";
 
@@ -417,10 +508,10 @@
 
                                     var image_url = await imageUplaod.uploadImage(productImagesHash[product_image_name]);
                                     await productImageRepo.CreateProductImage(new ProductImageDTO()
-                                        {
-                                            ProductId = newProduct.Id,
-                                            ProductImageUrl = image_url
-                                        });
+                                    {
+                                        ProductId = newProduct.Id,
+                                        ProductImageUrl = image_url
+                                    });
                                 }
 
                             }
@@ -453,11 +544,16 @@
             {
                 await JsRuntime.ToastrError("Some products failed to upload.");
             }
-
+            if(errorImageButtonFlag == 2)
+            {
+                errorImageButtonFlag = 1;
+                await JsRuntime.ToastrError("Some Product Images failed to upload.");
+            }
         }
         else
         {
             await JsRuntime.ToastrError("Some Error Occured.Check valid CSV is uploaded!");
         }
+        AreAllImagesUploaded = true;
     }
 }

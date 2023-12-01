@@ -1,4 +1,12 @@
 {
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:63887/",
+      "sslPort": 44330
+    }
+  },
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -11,11 +19,11 @@
     "Sukhdari_Server": {
       "commandName": "Project",
       "launchBrowser": true,
+      "applicationUrl": "http://localhost:5050",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "dotnetRunMessages": "true",
-      "applicationUrl": "http://localhost:5060"
+      "dotnetRunMessages": "true"
     },
     "WSL": {
       "commandName": "WSL2",
@@ -26,14 +34,6 @@
         "ASPNETCORE_URLS": "http://localhost:5060"
       },
       "distributionName": ""
-    }
-  },
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:63887/",
-      "sslPort": 44330
     }
   }
 }

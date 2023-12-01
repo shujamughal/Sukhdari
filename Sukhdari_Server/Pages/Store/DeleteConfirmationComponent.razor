@@ -20,7 +20,7 @@
                 }
                 else
                 {
-                    <button type="button" class="btn btn-danger" @onclick="()=>OnConfirmationChange(true)">
+                    <button type="button" class="btn btn-danger" disabled="@(!enableDeleteButton)" @onclick="()=>OnConfirmationChange(true)">
                     Delete
                 </button>
                 }
@@ -30,7 +30,7 @@
     </div>
 </div>
 @code {
-
+    public bool enableDeleteButton { get; set; } = true;
     public bool isProcessing { get; set; } = false;
     [Parameter]
     public EventCallback<bool> CconfirmationChanged{ get; set; }
@@ -45,6 +45,7 @@
 
     protected async Task OnConfirmationChange(bool value)
     {
+        enableDeleteButton = false;
         if(value)
         {
             isProcessing = true;

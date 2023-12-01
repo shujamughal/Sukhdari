@@ -32,6 +32,23 @@
         </div>
 
     </div>
+    <br />
+    <div class="row">
+        <div class="col-md-2">
+            <label class="form-label ml-5">Select Category:</label>
+        </div>
+        <div class="col-md-4">
+            <select class="form-control" @onchange="HandleCategoryChange" id="categoryId">
+                <option value="-1" selected>All Categories</option>
+                @foreach (var category in AllCategories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+
+
     <div class="card-body">
         <div class="table-responsive mt-2">
             @if (AllProducts != null && AllProducts.Any())
@@ -43,10 +60,15 @@
                             <th scope="col">Name</th>
                             <th scope="col">Category</th>
                             <th scope="col">Price (PKR)</th>
-                            @*<th scope="col">Discount %</th>
-                                <th scope="col">Weight (kg)</th>*@
                             <th scope="col">Quantity</th>
                             <th scope="col">Description</th>
+                            @if(Attributes != null && Attributes.Count > 0)
+                            {
+                                foreach(var attrib in Attributes)
+                                {
+                                    <th scope="col">@attrib.Key</th>
+                                }
+                            }
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
@@ -56,38 +78,45 @@
 
                         @foreach (var product in AllProducts)
                         {
+                            if(selectedCategoryId == -1 || product.CategoryId == selectedCategoryId)
+                            {
+                                <tr>
+                                    <td>@product.Name</td>
+                                    <td>@getProductCategoryName(@product.CategoryId)</td>
+                                    <td>@product.Price</td>
+                                    <td>@product.Quantity</td>
+                                    <td>@product.Description</td>
+                                    @if (Attributes != null && Attributes.Count > 0)
+                                    {
+                                        foreach (var attrib in Attributes)
+                                        {
+                                            <th scope="col">@product.Attributes.FirstOrDefault(i=>i.Key==attrib.Key).Value</th>
+                                        }
+                                    }
+                                    <td class="d-flex align-items-center justify-content-center  flex-column flex-md-row"
+                                        style="gap: 0.3rem;">
+                                        <a href="@($"/productView/{product.Id}")">
+                                            <div class="btn btn-primary">
 
+                                                <span class="oi oi-eye"></span>
+                                            </div>
+                                        </a>
+                                        <a href="@($"/product/update/{product.Id}")">
+                                            <div class="btn btn-secondary">
 
-                            <tr>
-                                <td>@product.Name</td>
-                                <td>@getProductCategoryName(@product.CategoryId)</td>
-                                <td>@product.Price</td>
-                                @*<td>0</td>
-                                    <td>2</td>*@
-                                <td>@product.Quantity</td>
-                                <td>@product.Description</td>
-                                <td class="d-flex align-items-center justify-content-center  flex-column flex-md-row"
-                            style="gap: 0.3rem;">
-                            <a href="@($"/productView/{product.Id}")">
-                                        <div class="btn btn-primary">
+                                                <span class="oi oi-pencil"></span>
+                                            </div>
+                                        </a>
 
-                                            <span class="oi oi-eye"></span>
-                                        </div>
-                                    </a>
-                                    <a href="@($"/product/update/{product.Id}")">
-                                        <div class="btn btn-secondary">
-
-                                            <span class="oi oi-pencil"></span>
-                                        </div>
-                                    </a>
-
-                                    @*<a href="@($"/product/delete/{product.Id}")">*@
+                                        @*<a href="@($"/product/delete/{product.Id}")">*@
                                         <div class="btn btn-danger" @onclick="()=>DeleteConfirmation(product.Id)">
                                             <span class="oi oi-trash"></span>
                                         </div>
-                                    @*</a>*@
-                                </td>
-                            </tr>
+                                        @*</a>*@
+                                    </td>
+                                </tr>
+                            }
+                            
                         }
                     }
 
@@ -114,6 +143,10 @@
     int productId;
     public IEnumerable<ProductDTO> AllProducts { get; set; }
     public IEnumerable<CategoryDTO> AllCategories { get; set; }
+
+    public int selectedCategoryId = -1;
+    private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -165,9 +198,24 @@
     {
         if(firstRender)
         {
-            JsRuntime.InvokeVoidAsync("ProductTable");
+            JsRuntime.InvokeVoidAsync("initializeDataTables");
         }
         return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void HandleCategoryChange(ChangeEventArgs e)
+    {
+
+        if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
+        {
+            if(Attributes.Any())
+                Attributes.Clear();
+            if(selectedCategoryId != -1)
+            {
+                Attributes.AddRange(AllCategories.FirstOrDefault(i => i.Id == selectedCategoryId).Attributes);
+                
+            }
+        }
     }
 
 }

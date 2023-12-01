@@ -155,6 +155,14 @@
 
             <div class="form-group">
                 <InputFile OnChange="HandleImageUpload" multiple></InputFile>
+                <div class="note mt-2">
+                    <strong class="d-block mb-2"><em>Note:</em></strong>
+                    <ol class="ml-4" style="font-weight: normal; color: Gray; font-size: 0.7em; FONT-FAMILY: open_sansregular, Verdana,Arial, Helvetica, sans-serif; font-style:italic">
+                        <li>Valid image formats are .jpg, .jpeg, .png</li>
+                        <li>The size of each image must not exceed 250 KB</li>
+                        <li>You can upload maximum 10 images of a product</li>
+                    </ol>
+                </div>
                 <div class="row">
                     @if (ProductDetails.ImageUrls != null && ProductDetails.ImageUrls.Count > 0)
                     {
@@ -179,16 +187,14 @@
             </div>
             <div class="form-group">
                 <div class="col-md-7">
-                    <button type="submit" class="btn btn-info">@btnName</button>
+                    <button type="submit" class="btn btn-info" disabled="@(!AreAllImagesUploaded)">@btnName</button>
                 </div>
             </div>
         </div>
     </EditForm>
 </div>
 
-
 @code {
-
     private string Title { get; set; } = "Add Product";
     private string btnName { get; set; } = "Add Product";
     private string message { get; set; } = "Product Added Successfully";
@@ -203,6 +209,7 @@
     private ProductImageDTO ProductImage { get; set; } = new ProductImageDTO();
 
     //I am Adding a Code
+    public bool AreAllImagesUploaded { get; set; } = true;
     private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>();
     //I am Added Code Above
 
@@ -237,6 +244,10 @@
                     product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
                 }
                 ProductDetails = product;
+            }
+            else
+            {
+                ProductDetails.ImageUrls = new List<string>();
             }
         }
     }
@@ -288,7 +299,7 @@
 
     private async void SaveProduct()
     {
-
+        AreAllImagesUploaded = false;
         if (ProductDetails.Id != 0 && Title == "Update Product")
         {
             if (DeletedImagesNames != null && DeletedImagesNames.Any())
@@ -327,49 +338,44 @@
     {
         try
         {
-            var images = new List<string>();
-            if (e.GetMultipleFiles().Count > 0)
+            AreAllImagesUploaded = false;
+            var totalImages = e.FileCount;
+            //var images = new List<string>();
+            if (totalImages > 0 && totalImages <= 10)
             {
                 foreach (var image in e.GetMultipleFiles())
                 {
-                    System.IO.FileInfo imageInfo = new System.IO.FileInfo(image.Name);
-                    if (imageInfo.Extension.ToLower() == ".jpg" ||
-                    imageInfo.Extension.ToLower() == ".png" ||
-                    imageInfo.Extension.ToLower() == ".jpeg")
+                    if (image.Size / 1024 <= 250)
                     {
-                        var uploadedImagePath = await imageUplaod.uploadImage(image);
-                        images.Add(uploadedImagePath);
+                        System.IO.FileInfo imageInfo = new System.IO.FileInfo(image.Name);
+                        if (imageInfo.Extension.ToLower() == ".jpg" ||
+                        imageInfo.Extension.ToLower() == ".png" ||
+                        imageInfo.Extension.ToLower() == ".jpeg")
+                        {
+                            var uploadedImagePath = await imageUplaod.uploadImage(image);
+                            // images.Add(uploadedImagePath);
+                            ProductDetails.ImageUrls.Add(uploadedImagePath);
+
+                        }
+                        else
+                        {
+                            await JsRuntime.ToastrError($"{image.Name} has Invalid File Format. Supported formats are .jpg, .jpeg, .png");
+                            continue;
+                        }
                     }
                     else
                     {
-                        return;
+                        await JsRuntime.ToastrError($"{image.Name} has size greater than 250 KB");
                     }
-                }
 
-
-                if (images.Any())
-                {
-                    if (ProductDetails.ImageUrls != null && ProductDetails.ImageUrls.Any())
-                    {
-                        ProductDetails.ImageUrls.AddRange(images);
-                        await JsRuntime.ToastrSuccess("Image Added Successfully");  
-                    }
-                    else
-                    {
-                        ProductDetails.ImageUrls = new List<string>();
-                        ProductDetails.ImageUrls.AddRange(images);
-                        await JsRuntime.ToastrSuccess("Image Added Successfully");  
-                    }
-                    foreach (var i in ProductDetails.ImageUrls)
-                    {
-                        Console.WriteLine(i);
-                    }
                 }
-                else
-                {
-                    return;
-                }
+                AreAllImagesUploaded = true;
 
+            }
+            else if (totalImages > 10)
+            {
+                await JsRuntime.ToastrError($"You can upload max. 10 image files");
+                AreAllImagesUploaded = true;
             }
         }
         catch (Exception ex)
@@ -377,11 +383,6 @@
             Console.WriteLine(ex.ToString());
             throw;
         }
-
-        //catch (Exception)
-        //{
-        //    throw;
-        //}
     }
 
     private async Task AddProductImage(ProductDTO product)
