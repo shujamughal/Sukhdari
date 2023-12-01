@@ -291,9 +291,9 @@
 
     //MyCode Starts
     public List<string> Attributes { get; set; } = new List<string>(); //It'll store attributes of all stores
-    public List<StoreAttributesDTO> selectedAttributes = new List<StoreAttributesDTO>(); // To store IDs of Attributes which the user have selected
     public List<String> AttributeValues { get; set; } = new List<string>(); //To avoid duplicate attribute values
     public IEnumerable<StoreDTO> ParticularTypeStores { get; set; } = new List<StoreDTO>(); //To hold the stores of particular store type
+    public List<List<String>> selectedAttributes { get; set; } = new List<List<string>>();
     //My code ends here
     //MyCode ends
 
@@ -404,13 +404,34 @@
         Stores = await Store.SearchStoreByProductPrice(min, max);
         FilteredStores = Stores;
     }
+    public void resetList()
+    {
+        foreach (var lst in selectedAttributes)
+        {
+            var temp = lst[0];
+            lst.Clear();
+            lst.Add(temp);
+        }
+    }
+    public bool isEmpty()
+    {
+        foreach (var lst in selectedAttributes)
+        {
+            if (lst.Count > 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
     public async Task ResetStores()
     {
         FilteredStores = Stores;
-        selectedAttributes.Clear();
+        resetList();
         AttributeValues.Clear();
         Attributes.Clear();
         selectedStoreType = "";
+
     }
     public async Task searchResults()
     {
@@ -513,6 +534,7 @@
                         if (!Attributes.Contains(attrib.Key.ToLower())) //To avoid duplication
                         {
                             Attributes.Add(attrib.Key.ToLower());
+                            selectedAttributes.Add(new List<string> { $"{attrib.Key}" });
                         }
                     }
                 }
@@ -524,38 +546,47 @@
     {
         if((bool)checkedValue)
         {
-            selectedAttributes.Add(attributeValue);
+            selectedAttributes.FirstOrDefault(attributes => attributes.Contains(attributeValue.Key)).Add(attributeValue.Value);
         }
         else
         {
-            selectedAttributes.Remove(attributeValue);
+            selectedAttributes.FirstOrDefault(attributes => attributes.Contains(attributeValue.Key)).Remove(attributeValue.Value);
         }
-        if(selectedAttributes.Any()) //Handling multiple Store Attributes Selection
+        if(!isEmpty()) //Handling multiple Store Attributes Selection
         {
-            int i = 0;
             List<StoreDTO> stores = new List<StoreDTO>();
             List<StoreDTO> AttributeFilteredStores = new List<StoreDTO>();
-            foreach(var attrib in selectedAttributes)
+            int iteration = 1;
+            foreach (var attributesList in selectedAttributes)
             {
-                foreach(var store in ParticularTypeStores)
+                if (attributesList.Count > 1)
                 {
-                    var result = store.Attributes.Where(i => i.Value.ToLower() == attrib.Value.ToLower());
-                    if (result.Any())
-                        AttributeFilteredStores.Add(store);
+                    foreach (var attribValue in attributesList)
+                    {
+                        foreach (var prod in ParticularTypeStores)
+                        {
+                            var prd = prod.Attributes.Where(i => i.Value.ToLower() == attribValue.ToLower()); //verify .lower()
+
+                            if (prd.Any())
+                                AttributeFilteredStores.Add(prod);
+                        }
+                        stores = stores.Union(AttributeFilteredStores).ToList();
+                        AttributeFilteredStores.Clear();
+
+                    }
+                    if (iteration == 1) //To skip the first iteration
+                    {
+                        FilteredStores = stores.ToList();
+                        iteration++;
+                    }
+                    else
+                    {
+                        FilteredStores = FilteredStores.Intersect(stores).ToList();
+                    }
+                    stores.Clear();
                 }
-                
-                if (i == 0)
-                {
-                    stores = AttributeFilteredStores.ToList();
-                    i++;
-                }
-                else
-                {
-                    stores = stores.Intersect(AttributeFilteredStores).ToList();
-                }
-                AttributeFilteredStores.Clear(); 
             }
-            FilteredStores = stores;
+
         }
         else
         {

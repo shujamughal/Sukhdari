@@ -75,7 +75,7 @@
                                     {
                                         if (!attributeValues.Contains(attrib.Value.ToLower()))
                                         {
-                                            <input class="form-check-input" type="checkbox" @onchange="@(async (e)=> await HandleAttributesCheckBox(attrib.Value, e.Value))">
+                                            <input class="form-check-input" type="checkbox" @onchange="@(async (e)=> await HandleAttributesCheckBox(attrib.Key, attrib.Value, e.Value))">
                                             <label class="form-check-label" for="flexCheckDefault">
                                                 @attrib.Value.ToUpper()
                                             </label>
@@ -230,6 +230,7 @@
 
     </div>
 </div>
+
 @code
 {
     [Parameter]
@@ -249,9 +250,9 @@
 
     // I am Adding
     private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>(); //To store category attributes
-    public List<string> selectedAttributes = new List<string>(); // To store IDs of Attributes which the user will select
     public List<String> attributeValues = new List<String>(); // To store the values of attributes so that the same value appears only once
     public List<ProductDTO> CategoryAttributesProducts { get; set; }
+    public List<List<String>> selectedAttributes { get; set; } = new List<List<string>>();
     // I have Added
 
     public bool IsChecked { get; set; }
@@ -304,7 +305,7 @@
     // I am adding some Code below
     public async Task CategoryCheckboxClicked(int categoryId)
     {
-        if (selectedCategory != null && Attributes.Count>0)
+        if (selectedCategory != null && Attributes.Count>0 && !isEmpty())
         {
             await JSRuntime.InvokeVoidAsync("resetAttributes");
         }
@@ -315,6 +316,7 @@
         var category = allCategories.FirstOrDefault(c => c.Id == categoryId);
         foreach (var attribute in category.Attributes)
         {
+            selectedAttributes.Add(new List<string>{$"{attribute.Key.ToLower()}"});
             Attributes.Add(attribute);
         }
         FilteredProducts = Products.Where(i => i.CategoryId == categoryId);
@@ -322,58 +324,95 @@
 
     }
 
-    private IEnumerable<ProductDTO> FilterProductsBasedOnAttributes(List<ProductAttributesDTO> selectedAttributes)
-    {
-        // Filter products based on selected attributes and their values
-        var matchingProducts = Products;
+    // private IEnumerable<ProductDTO> FilterProductsBasedOnAttributes(List<ProductAttributesDTO> selectedAttributes)
+    // {
+    //     // Filter products based on selected attributes and their values
+    //     var matchingProducts = Products;
 
-        foreach (var selectedAttribute in selectedAttributes)
-        {
-            matchingProducts = matchingProducts
-                .Where(product => product.Attributes.Any(attr => attr.Key == selectedAttribute.Key && attr.Value == selectedAttribute.Value));
-        }
+    //     foreach (var selectedAttribute in selectedAttributes)
+    //     {
+    //         matchingProducts = matchingProducts
+    //             .Where(product => product.Attributes.Any(attr => attr.Key == selectedAttribute.Key && attr.Value == selectedAttribute.Value));
+    //     }
 
-        return matchingProducts;
-    }
+    //     return matchingProducts;
+    // }
 
-    public async Task HandleAttributesCheckBox(string attributeValue, object checkedValue)
+    public async Task HandleAttributesCheckBox(string attributeKey, string attributeValue, object checkedValue)
     {
         if((bool)checkedValue)
         {
-            selectedAttributes.Add(attributeValue);
+            selectedAttributes.FirstOrDefault(attributes => attributes.Contains(attributeKey.ToLower())).Add(attributeValue);
         }
         else
         {
-            selectedAttributes.Remove(attributeValue);
+            selectedAttributes.FirstOrDefault(attributes => attributes.Contains(attributeKey.ToLower())).Remove(attributeValue);
         }
 
-        if(selectedAttributes.Any()) //Handling multiple Product Attributes Selection
+        if(!isEmpty()) //Handling multiple Product Attributes Selection
         {
             List<ProductDTO> prods = new List<ProductDTO>();
             List<ProductDTO> AttributeFilteredProducts = new List<ProductDTO>();
-            foreach (var attribValue in selectedAttributes)
+            int iteration = 1;
+            foreach(var attributesList in selectedAttributes)
             {
-                foreach (var prod in CategoryAttributesProducts)
+                if(attributesList.Count > 1)
                 {
-                    var prd = prod.Attributes.Where(i => i.Value.ToLower() == attribValue.ToLower()); //verify .lower()
+                    foreach(var attribValue in attributesList)
+                    {
+                        foreach (var prod in CategoryAttributesProducts)
+                        {
+                            var prd = prod.Attributes.Where(i => i.Value.ToLower() == attribValue.ToLower()); //verify .lower()
 
-                    if (prd.Any())
-                        AttributeFilteredProducts.Add(prod);
+                            if (prd.Any())
+                                AttributeFilteredProducts.Add(prod);
+                        }
+                        prods = prods.Union(AttributeFilteredProducts).ToList();
+                        AttributeFilteredProducts.Clear();
+
+                    }
+                    if (iteration == 1) //To skip the first iteration
+                    {
+                        FilteredProducts = prods.ToList();
+                        iteration++;
+                    }
+                    else
+                    {
+                        FilteredProducts = FilteredProducts.Intersect(prods).ToList();
+                    }
+                    prods.Clear();
                 }
-                prods = prods.Union(AttributeFilteredProducts).ToList();
-                AttributeFilteredProducts.Clear();
             }
-            FilteredProducts = prods;
         }
         else
         {
             FilteredProducts = CategoryAttributesProducts;
         }
     }
+    public bool isEmpty()
+    {
+        foreach(var lst in selectedAttributes)
+        {
+            if(lst.Count > 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    public void resetList()
+    {
+        foreach (var lst in selectedAttributes)
+        {
+            var temp = lst[0];
+            lst.Clear();
+            lst.Add(temp);
+        }
+    }
     public async Task ResetAttributes()
     {
         FilteredProducts = CategoryAttributesProducts;
-        selectedAttributes.Clear();
+        resetList();
     }
     public async Task ResetCategories()
     {
