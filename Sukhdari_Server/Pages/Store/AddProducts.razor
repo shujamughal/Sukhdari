@@ -27,33 +27,32 @@
     @* //-----------------MyCode started------------------------*@
     @* Select Category *@
     <div class="card-body">
-    <EditForm Model="ProductDetails" class="form-horizontal">
-        <div class="form-group">
-            <label class="col-md-7 control-label" for="product_categorie">PRODUCT CATEGORY</label>
-            <div class="col-md-7">
-                @* <InputSelect @bind-Value="ProductDetails.CategoryId" class="form-control" @oninput="HandleCategoryChange"> *@
-                <InputSelect @bind-Value="selected_category" TValue="string" class=" form-control" @oninput="HandleCategoryChange">
-                    <option >Select category</option>
-                    @foreach (var category in Categories)
-                    {
-                       <option value="@category.Id">@category.Name</option>
-                    }
-                </InputSelect>
-                @* <ValidationMessage For="()=>ProductDetails.CategoryId"></ValidationMessage> *@
+        <EditForm Model="ProductDetails" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-7 control-label" for="product_categorie">PRODUCT CATEGORY</label>
+                <div class="col-md-7">
+                    @* <InputSelect @bind-Value="ProductDetails.CategoryId" class="form-control" @oninput="HandleCategoryChange"> *@
+                    <InputSelect @bind-Value="selected_category" TValue="string" class=" form-control" @oninput="HandleCategoryChange">
+                        <option>Select category</option>
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </InputSelect>
+                    @* <ValidationMessage For="()=>ProductDetails.CategoryId"></ValidationMessage> *@
+                </div>
             </div>
-        </div>
-    </EditForm>
+        </EditForm>
     </div>
     @* //------------------My Code Ended------------------------*@
 
 
     <div class="card-body">
-
         <div>
             <span>Product Bulk Upload CSV Template</span>
+            @* <a href="/Format//BulkProductsTemplate.csv" class="btn btn-outline-success" download>Download Csv Template</a> *@
             <a href="/Format//BulkProductsTemplate.csv" class="btn btn-outline-success" download>Download Csv Template</a>
         </div>
-
         <div class="mt-5">
             <span>Product Details CSV File</span>
             <InputFile OnChange="@HandleCSVFileUpload" accept=".csv" class="form-control"></InputFile>
@@ -63,20 +62,29 @@
             <InputFile OnChange="@HandleImageUpload" multiple accept=".jpg,.jpeg,.png" class="form-control"></InputFile>
         </div>
         <button @onclick="@addProductsInBulk" class="btn btn-primary mt-3">Add</button>
+        @if (errorFileButtonFlag != 0)
+        {
+            <div class="mt-5">
+                <span>Products failed to add</span>
+                <a href="/Format//ProductsFailed.csv" class="btn btn-outline-success" download>Download</a>
+            </div>
+        }
     </div>
 </div>
 
 @code {
+
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; }
     public IEnumerable<CategoryDTO> Categories { get; set; }
     // myCode Start
+    public int errorFileButtonFlag = 0;
     public CategoryDTO CategoryDetails { get; set; } = new CategoryDTO();
     private List<CategoryAttributesDTO> Attributes = new List<CategoryAttributesDTO>();
     public string selected_category;
     public ProductDTO ProductDetails { get; set; } = new ProductDTO();
     public List<string> commonAttributes = new List<string> { "Product_Name", "Product_Category", "Product_Price", "Discount_Percentage", "Available_Quantity", "Product_Description", "Product_Images" };
-    public List<string> columnsInCSV = new List<string> ();
+    public List<string> columnsInCSV = new List<string>();
     //myCode End
     IReadOnlyList<IBrowserFile> uploadedImages;
     IBrowserFile productDetailsCSV;
@@ -158,7 +166,6 @@
         // Path to the BulkProductsTemplate.csv file
         //var filePath = Path.Combine(directoryPath, "BulkProductsTemplate.csv");
         var filePath = Path.Combine(directoryPath, "BulkProductsTemplate.csv");
-
         // Write the CSV content to the file
         File.WriteAllTextAsync(filePath, csvContent.ToString());
 
@@ -215,16 +222,48 @@
 
     private async Task addProductsInBulk()
     {
+        string errorMsg = "";
+
+        //--------------Code to create a csv file for not added products-----------------------
+        var csvContent = new StringBuilder();
+        csvContent.AppendLine("\"Product_Name\",\"Error\"");
+        // var columnsLine = string.Join(",", columnsInCSV);
+        // csvContent.AppendLine(columnsLine);
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Format");
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+        var filePath = Path.Combine(directoryPath, "ProductsFailed.csv");
+
+        //await File.WriteAllTextAsync(filePath, csvContent.ToString());
+
+        //---------------Code end here for csv file creation for failed products--------------------------------------
         if (productsCsv.Count() > 0)
         {
             int index = 0;
             foreach (var product in productsCsv)
             {
+
+                //int nullFlag = 0; // to handle null fields
                 var newProduct = new ProductDTO();
                 if (index++ == 0 || product == null || product.Count() <= 0)
                 {
                     continue;
                 }
+                //----------------
+                if (product.Any(field => field == null || (field is string && string.IsNullOrEmpty((string)field))))
+                {
+                    errorFileButtonFlag = 1;
+                    errorMsg = "Empty fields are not allowed.";
+                    errorMsg = errorMsg.Replace("\"", "\"\"");
+
+                    csvContent.AppendLine($"\"{product[0]}\",\"{errorMsg}\"");
+                    await File.WriteAllTextAsync(filePath, csvContent.ToString());
+                    errorMsg = "";
+                    continue;
+                }
+                //--------------
                 var productDTO = new ProductDTO();
                 try
                 {
@@ -238,6 +277,14 @@
                     productDTO.Description = product[5];
                     productDTO.ClickCount = 0;
                     productDTO.StoreId = store_id;
+
+                    // foreach(var item in product)
+                    // {
+                    //     if (item == "" || item == null || (item is string && string.IsNullOrEmpty((string)item)))
+                    //     {
+                    //         nullFlag--;
+                    //     }
+                    // }
 
                     int i = 7;
                     foreach (var attrb in cat.Attributes)
@@ -253,19 +300,70 @@
                             productDTO.Attributes.Add(attrib);
                         }
                     }
+
+                    // foreach (var attribItem in productDTO.Attributes)
+                    // {
+                    //     if (attribItem == null )
+                    //     {
+                    //         nullFlag--;
+                    //     }
+                    // }
+
+
+
                 }
                 catch (Exception e)
                 {
-                    await JsRuntime.ToastrWarning("Error during Product Addition: "+e.Message);
-                    continue;
+
+                    //await JsRuntime.ToastrWarning("Error during Product Addition: " + e.Message);
+                    // if (nullFlag<0)
+                    // {
+                    //     errorMsg = "Empty fields are not allowed.";
+                    //     errorMsg = errorMsg.Replace("\"", "\"\"");
+
+                    //     csvContent.AppendLine($"\"{productDTO.Name}\",\"{errorMsg}\"");
+                    //     await File.WriteAllTextAsync(filePath, csvContent.ToString());
+                    //     errorMsg = "";
+                    // }
+
+                    //continue;
                 }
 
                 try
                 {
-                    newProduct = await Product.createProduct(productDTO);
+                    if (productDTO.Price > 0 && productDTO.DiscountPercentage >= 0 && productDTO.DiscountPercentage <= 100 && productDTO.Quantity > 0)
+                    {
+                        newProduct = await Product.createProduct(productDTO);
+                    }
+                    else
+                    {
+                        errorFileButtonFlag = 1;
+                        if (productDTO.Price <= 0)
+                        {
+                            //await JsRuntime.ToastrError("Product price must be graeter than zero.");
+                            errorMsg = errorMsg + "Product price must be greater than zero.";
+                        }
+                        if (productDTO.DiscountPercentage < 0 || productDTO.DiscountPercentage > 100)
+                        {
+                            //await JsRuntime.ToastrError("Discount Percentage must be between 0 and 100.");
+                            errorMsg = errorMsg + "Discount Percentage must be between 0 and 100.";
+                        }
+                        if (productDTO.Quantity < 1)
+                        {
+                            //await JsRuntime.ToastrError("Product quantity must be graeter than zero.");
+                            errorMsg = errorMsg + "Product quantity must be greater than zero.";
+                        }
+                        // if (nullFlag < 0)
+                        // {
+
+                        //     errorMsg = errorMsg + "Empty fields are not allowed.";
+                        // }
+                    }
+
                 }
-                catch (Exception )
+                catch (Exception e)
                 {
+
                     if (newProduct.Name != null)
                     {
 
@@ -280,12 +378,14 @@
                 }
                 if (newProduct == null)
                 {
-                    await JsRuntime.ToastrWarning("Product Already Exists");
+                    errorFileButtonFlag = 1;
+                    //await JsRuntime.ToastrWarning("Product Already Exists");
+                    errorMsg = errorMsg + "Product Already Exists.";
 
                 }
-                else
+                else if (productDTO.Price > 0 && productDTO.DiscountPercentage >= 0 && productDTO.DiscountPercentage <= 100 && productDTO.Quantity > 0)
                 {
-                    await JsRuntime.ToastrSuccess($"Product {productDTO.Name} Added Successfully");
+                    //await JsRuntime.ToastrSuccess($"Product {productDTO.Name} Added Successfully");
 
                     try
                     {
@@ -308,13 +408,26 @@
                             }
                         }
                     }
-                    catch (Exception )
+                    catch (Exception)
                     {
+                        //errorFileButtonFlag = 1;
                         await JsRuntime.ToastrError($"Error Uploading pictures for {productDTO.Name}!");
+                        errorMsg = errorMsg + "Error with pictures Uploading. Only .png,.jpg and.jpeg extensions are supported for image files. Multiple image files must be separated by colon(:)";
                     }
 
                 }
+
+                if (!string.IsNullOrEmpty(errorMsg))
+                {
+                    errorMsg = errorMsg.Replace("\"", "\"\"");
+
+                    csvContent.AppendLine($"\"{productDTO.Name}\",\"{errorMsg}\"");
+                    await File.WriteAllTextAsync(filePath, csvContent.ToString());
+                }
+                errorMsg = "";
+
             }
+
         }
         else
         {
@@ -322,3 +435,5 @@
         }
     }
 }
+
+

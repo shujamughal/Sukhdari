@@ -42,13 +42,15 @@
 
 <div class="row m-0">
     <div class="card bg-light col-2 m-2 p-2 filterDiv" style="left:1% ">
-        <form>
+        @if (Stores != null && Stores.Count() > 0)
+        {
+            <form>
 
-            @* Uncomment the following code if you're handling multiple countries *@
+                @* Uncomment the following code if you're handling multiple countries *@
 
-            @* <h4>Filters</h4>
+                 <h4>Filters</h4>
             <hr />
-            <h5>Location</h5>
+                @*<h5>Location</h5>
             <div class="form-check ml-2">
                 @if (AllStores != null && AllStores.Any())
                 {
@@ -68,127 +70,79 @@
                         </label>
                          <br />    
                     }
-               
+
             </div>
             <hr /> *@
 
-            <h5>PRICE</h5>
-            <div class="ml-2 row">
-                <input type="number" class="col-5 p-0 mr-1" @bind-value="min" />
-                <input type="number" class="col-5 p-0" @bind-value="max" />
-            </div>
-            <div>
-                <br />
-                <div class="ml-2">
-                <button class="col-5 mr-1 btn btn-primary" type="submit" @onclick="findStoresByPrice">Search</button>
-                @* <button class="col-5 btn btn-success" type="submit" @onclick="ResetStores">Reset</button> *@
-                <input type="reset" value="Reset" class="col-5 btn btn-success" @onclick="ResetStores" />
-                </div>
-            </div>
-            <hr />
-
-            <h5>STORE TYPE</h5>
-            <div class="form-check ml-2">
-                @if (FilteredStores != null && FilteredStores.Any())
-                {
-                    @foreach (var type in FilteredStores)
+                <h5>STORE TYPE</h5>
+                <div class="form-check ml-2">
+                    @if (FilteredStores != null && FilteredStores.Any())
                     {
-                        @if (!storeTypes.Contains(type.Type))
+                        @foreach (var type in FilteredStores)
                         {
-                            storeTypes.Add(type.Type);
+                            @if (!storeTypes.Contains(type.Type))
+                            {
+                                storeTypes.Add(type.Type);
+                            }
                         }
                     }
-                }
-                @foreach (var type in storeTypes)
+                    @foreach (var type in storeTypes)
                     {
                         <input class="form-check-input" type="radio" name="categoryRadioButton" @onchange="@(async (e) => await StoreTypeCheckbox(type, e.Value))">
                         <label class="form-check-label" for="flexCheckDefault">
                             @type
                         </label>
-                         <br />    
+                        <br />
                     }
-            </div>
-            <hr />
+                </div>
+                <hr />
 
-            <form id="AttributesForm">
-                @if(Attributes!= null && Attributes.Count>0)
-                {
-                    foreach(var storeAttrib in Attributes)
+                <form id="AttributesForm">
+                    @if (Attributes != null && Attributes.Count > 0)
                     {
-                        <h5>@storeAttrib.ToUpper()</h5>
-                        foreach (var store in ParticularTypeStores)
+                        foreach (var storeAttrib in Attributes)
                         {
-                            if (store.Attributes != null && store.Attributes.Count > 0)
+                            <h5>@storeAttrib.ToUpper()</h5>
+                            foreach (var store in ParticularTypeStores)
                             {
-                                foreach (var attrib in store.Attributes)
+                                if (store.Attributes != null && store.Attributes.Count > 0)
                                 {
-                                    if(attrib.Key.ToLower() == storeAttrib)
+                                    foreach (var attrib in store.Attributes)
                                     {
-                                        if (!AttributeValues.Contains(attrib.Value.ToLower()))
+                                        if (attrib.Key.ToLower() == storeAttrib)
                                         {
-                                            AttributeValues.Add(attrib.Value.ToLower());
-                                            <div class="form-check ml-2">
-                                                <input type="checkbox" class="form-check-input" @onchange="@(async (e)=> await HandleAttributesCheckBox(attrib, e.Value))" />
-                                                <label class="form-check-label">@attrib.Value</label>
-                                            </div>
+                                            if (!AttributeValues.Contains(attrib.Value.ToLower()))
+                                            {
+                                                AttributeValues.Add(attrib.Value.ToLower());
+                                                <div class="form-check ml-2">
+                                                    <input type="checkbox" class="form-check-input" @onchange="@(async (e)=> await HandleAttributesCheckBox(attrib, e.Value))" />
+                                                    <label class="form-check-label">@attrib.Value</label>
+                                                </div>
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    <hr />
-                    AttributeValues.Clear();
+                        <hr />
+                        AttributeValues.Clear();
                 }
                 <input type="reset" hidden />
             </form>
-
-            <h5>DISCOUNT</h5>
-            <div class="form-check ml-2">
-
-               @if(checkBoxIndex[0] == 0)
-                {
-                    <input type="checkbox" class="form-check-input" @onchange="@((e) => DiscountCheckboxClicked(25, 0, e.Value))" >
-                    <label class="form-check-label">Upto 25%</label><br />
-                }
-                else if(checkBoxIndex[0] == 1)
-                {
-                    <input type="checkbox" class="form-check-input" @onchange="@((e) => DiscountCheckboxClicked(25, 0, e.Value))" checked>
-                    <label class="form-check-label">Upto 25%</label><br />
-                }
-                
-                @if(checkBoxIndex[1] == 0)
-                {
-                    <input class="form-check-input" type="checkbox" @onchange="@((e) => DiscountCheckboxClicked(50, 1, e.Value))">
-                    <label class="form-check-label">Upto 50%</label><br />
-                }
-                else if(checkBoxIndex[1] == 1)
-                {
-                    <input class="form-check-input" type="checkbox" @onchange="@((e) => DiscountCheckboxClicked(50, 1, e.Value))" checked>
-                    <label class="form-check-label">Upto 50%</label><br />
-                }
-                @if(checkBoxIndex[2] == 0)
-                {
-                    <input class="form-check-input" type="checkbox" @onchange="@((e) => DiscountCheckboxClicked(75, 2, e.Value))" >
-                    <label class="form-check-label">Upto 75%</label><br />
-                    
-                }
-                else if(checkBoxIndex[2] == 1)
-                {
-                    <input class="form-check-input" type="checkbox" @onchange="@((e) => DiscountCheckboxClicked(75, 2, e.Value))" checked>
-                    <label class="form-check-label">Upto 75%</label><br />
-                }
-            
-            </div>
       
+            <div class="ml-2">
+                <input type="reset" value="Reset" class="col-5 btn btn-success" @onclick="ResetStores" />
+            </div>
+
         </form>
+        }
     </div>
     
 
     <div class="form-inline justify-content-center mt-4 col-9">
         @if (Stores == null)
         {
-            <div style="top:50%;left:53%;margin-top:-50px;margin-left:-100px;">
+            <div style="top:50%;left:53%;margin-top:25px;margin-left:-100px;margin-bottom:25px;">
                 <img src="Images/loader.gif" />
             </div> 
         }
@@ -452,9 +406,6 @@
     }
     public async Task ResetStores()
     {
-        min = 0;
-        max = 10000;
-        //Stores = await Store.getAllStores();
         FilteredStores = Stores;
         selectedAttributes.Clear();
         AttributeValues.Clear();

@@ -24,8 +24,21 @@
         @if (Products != null && Products.Any())
         {
             <h4>Filters</h4>
-            
-             <hr />
+            <hr />
+
+            <h5>PRICE</h5>
+            <div class="ml-2 row">
+                <input type="number" class="col-5 p-0 mr-1" @bind-value="min" />
+                <input type="number" class="col-5 p-0" @bind-value="max" />
+            </div>
+            <div>
+                <br />
+                <div class="ml-2">
+                    <button class="col-5 mr-1 btn btn-primary" type="submit" @onclick="findProductsByPrice">Search</button>
+                </div>
+            </div>
+            <hr />
+
             <h5>Categories</h5>
             <div class="form-check ml-2">
                 <form id="Categories">
@@ -41,7 +54,7 @@
                         }
                     }
                     <br>
-                    <input class="btn btn-primary" type="reset" value="Reset" @onclick="ResetCategories">
+                    <input class="btn btn-primary" type="reset" value="Reset Filter" @onclick="ResetCategories">
                 </form>
             </div>
            <hr />
@@ -76,7 +89,7 @@
                         </div>
                     }
                     <br>
-                    <input class="col-5 btn btn-success" type="reset" value="Reset" @onclick="ResetAttributes">
+                    <input class="col-5 btn btn-success" type="reset" value="Reset Attributes" @onclick="ResetAttributes">
                 </form>
                 attributeValues.Clear(); 
                 <hr />
@@ -127,7 +140,9 @@
     <div class="form-inline justify-content-center mt-4 col-9">
         @if (Products == null)
         {
-            <p><em>Loading...</em></p>
+            <div style="top:50%;left:53%;margin-top:25px;margin-left:-100px;margin-bottom:25px;">
+                <img src="Images/loader.gif" />
+            </div>
         }
         else if (Products != null && Products.Any())
         {
@@ -219,6 +234,8 @@
 {
     [Parameter]
     public int Id { get; set; }
+    int min = 0;
+    int max = 10000;
     public string SearchProduct { get; set; } = "";
     public IEnumerable<ProductDTO> FilteredProducts { get; set; }
     public IEnumerable<CategoryDTO> allCategories { get; set; }
@@ -360,11 +377,18 @@
     }
     public async Task ResetCategories()
     {
+        min = 0;
+        max = 10000;
         FilteredProducts = Products;
         JSRuntime.InvokeVoidAsync("resetCategories");
         Attributes.Clear();
         selectedAttributes.Clear();
         selectedCategory = null;
+    }
+
+    public async Task findProductsByPrice()
+    {
+        FilteredProducts = FilteredProducts.Where(i => i.Price >= min && i.Price <= max);
     }
 
     // I am adding some Code above
