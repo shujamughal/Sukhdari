@@ -5,6 +5,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
-    <NameOfLastUsedPublishProfile>E:\Bilal%27s Data\PUCIT\Semester 7\FYP\Sukhdari %28Local%29\Sukhdari_Server\Properties\PublishProfiles\server.powerlatics.com - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>\\Mac\Home\Documents\FYP\Sukhdari_Server\Properties\PublishProfiles\server.powerlatics.com - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
