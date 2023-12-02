@@ -274,8 +274,34 @@
     
     <div class="row d-flex flex-row justify-content-center col-12 m-0 p-0 ">
     <a href="@($"stores/store/{store.Id}")" class="btn btn-primary m-2 col-3"><i class="fa fa-eye"></i></a>
-    <a href="@($"stores/about/{store.Id}")" class="btn btn-secondary m-2 col-3"><i class="fa fa-info"></i></a>
-    <a href="@($"stores/contact/{store.Id}")" class="btn btn-danger m-2 col-3"><span class="fa fa-phone"></span></a>
+    @*About Us*@
+    <SfButton @onclick="(e) => OpenDialogAbout(store.Id)" class="btn btn-secondary m-2 col-3"><i class="fa fa-info"></i></SfButton>
+        <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="@IsAboutVisible" AllowPrerender="true" IsModal="true">
+            <DialogTemplates>
+                <Header> About Us </Header>
+                    <Content>
+                        <h3>About Us</h3>
+                            <p>@StDescrition</p>
+                        <h3>Location</h3>
+                            <p>@StAddress</p>
+                    </Content>
+            </DialogTemplates>
+        </SfDialog>
+    @*Contact Us*@
+    <SfButton @onclick="(e) => OpenContactDialog(store.Id)" class="btn btn-danger m-2 col-3"><i class="fa fa-phone"></i></SfButton>
+        <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="@IsContactVisible" AllowPrerender="true" IsModal="true">
+            <DialogTemplates>
+                <Header>Contact Us</Header>
+                    <Content>
+                        <h3>Phone #</h3>
+                            <p>@StphoneNo</p>
+                        <h3>Email</h3>
+                            <p>@email</p>
+                        <h3>Location</h3>
+                            <p>@StAddress</p>
+                    </Content>
+            </DialogTemplates>
+        </SfDialog>
        </div>         
     @{caresoltag++;}
 </div>} 
@@ -308,13 +334,43 @@
     public int[] discountList = { 25, 50, 75 };
     int min = 0;
     int max = 10000;
+    //MyCode Starts
 
-    //My Code
+
+
+
     public List<string> Attributes { get; set; } = new List<string>(); //It'll store attributes of all stores
     public List<StoreAttributesDTO> selectedAttributes = new List<StoreAttributesDTO>(); // To store IDs of Attributes which the user have selected
     public List<String> AttributeValues { get; set; } = new List<string>(); //To avoid duplicate attribute values
     public IEnumerable<StoreDTO> ParticularTypeStores { get; set; } = new List<StoreDTO>(); //To hold the stores of particular store type
     //My code ends here
+    //MyCode ends
+    public string StphoneNo { get; set; }
+    public string StAddress { get; set; }
+    public string StDescrition { get; set; }
+    public string email { get; set; }
+    public StoreDTO StoreClicked;
+    private bool IsAboutVisible { get; set; } = false;
+    private bool IsContactVisible { get; set; } = false;
+
+    private async Task OpenDialogAbout(int storeId)
+    {
+        StDescrition = AllStores.FirstOrDefault(i => i.Id == storeId).Description;
+        StAddress = AllStores.FirstOrDefault(i => i.Id == storeId).Address;
+
+        this.IsAboutVisible = true;
+    }
+
+
+    private async Task OpenContactDialog(int storeId)
+    {
+        StphoneNo = AllStores.FirstOrDefault(i => i.Id == storeId).phoneNo;
+        StAddress = AllStores.FirstOrDefault(i => i.Id == storeId).Address;
+        StoreClicked = AllStores.FirstOrDefault(i => i.Id == storeId);
+        email = await Store.getEmailByUserId(StoreClicked.UserId);
+        this.IsContactVisible = true;
+    }
+    //My Code
 
     public List<string> selectedCountries = new List<string>();
     protected override async Task OnInitializedAsync()
