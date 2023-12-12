@@ -278,14 +278,6 @@
                     productDTO.ClickCount = 0;
                     productDTO.StoreId = store_id;
 
-                    // foreach(var item in product)
-                    // {
-                    //     if (item == "" || item == null || (item is string && string.IsNullOrEmpty((string)item)))
-                    //     {
-                    //         nullFlag--;
-                    //     }
-                    // }
-
                     int i = 7;
                     foreach (var attrb in cat.Attributes)
                     {
@@ -300,16 +292,6 @@
                             productDTO.Attributes.Add(attrib);
                         }
                     }
-
-                    // foreach (var attribItem in productDTO.Attributes)
-                    // {
-                    //     if (attribItem == null )
-                    //     {
-                    //         nullFlag--;
-                    //     }
-                    // }
-
-
 
                 }
                 catch (Exception e)
