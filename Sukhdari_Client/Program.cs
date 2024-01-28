@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Sukhdari_Client.Service;
 using Sukhdari_Client.Service.IService;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Syncfusion.Blazor;
+using CurrieTechnologies.Razor.SweetAlert2;
 
 namespace Sukhdari_Client
 {
@@ -19,7 +16,6 @@ namespace Sukhdari_Client
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mjk1OTk5NEAzMjMzMmUzMDJlMzBpWDBMdnBNZXhhVTZ3M0hhUnJIWjkxbnQxdTFqR05BVnFROWxrV1AyQXRZPQ==");
 
             builder.Services.AddHttpClient("IP", (options) => {
                 options.BaseAddress = new Uri("https://jsonip.com");
@@ -27,7 +23,7 @@ namespace Sukhdari_Client
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration.GetValue<string>("BaseApiUrl", "https://localhost:44353/")) });
             builder.Services.AddScoped<IStoreService, StoreService>();
             builder.Services.AddScoped<IUserIpService, UserIpService>();
-            builder.Services.AddSyncfusionBlazor();
+            builder.Services.AddSweetAlert2();
             await builder.Build().RunAsync();
         }
     }

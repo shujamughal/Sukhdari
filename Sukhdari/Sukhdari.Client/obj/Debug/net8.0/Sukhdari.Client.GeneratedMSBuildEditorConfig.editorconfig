@@ -1,0 +1,79 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = Sukhdari.Client
+build_property.RootNamespace = Sukhdari.Client
+build_property.ProjectDir = E:\Converter\Sukhdari\Sukhdari\Sukhdari.Client\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = E:\Converter\Sukhdari\Sukhdari\Sukhdari.Client
+build_property._RazorSourceGeneratorDebug = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/About.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWJvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/Contact.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/Product.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/SpecificStore.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU3BlY2lmaWNTdG9yZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Um91dGVzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/Card.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2FyZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-1lupe8ptgd
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-96696f3m3y
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/BasicNavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEJhc2ljTmF2TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-bklylmxwvb
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/HomeLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEhvbWVMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-elwkhr65r9
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/HomeNavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEhvbWVOYXZNZW51LnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-6uc0t9pqce
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-e7nig4bqxq
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/NavMenuClient.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnVDbGllbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-sf9uiq1db7
+
+[E:/Converter/Sukhdari/Sukhdari/Sukhdari.Client/Shared/StoreLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFN0b3JlTGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-eca9n7ju5f

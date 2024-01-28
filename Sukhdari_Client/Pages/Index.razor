@@ -2,6 +2,7 @@
 @layout HomeLayout
 @inject IStoreService Store
 @inject IJSRuntime JSRuntime
+@inject SweetAlertService Swal
 @inject Microsoft.Extensions.Configuration.IConfiguration config
 <div id="carouselDiv" class="row p-0 m-0">
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -229,33 +230,11 @@
     <div class="row d-flex flex-row justify-content-center col-12 m-0 p-0 ">
     <a href="@($"stores/store/{store.Id}")" class="btn btn-primary m-2 col-3"><i class="fa fa-eye"></i></a>
     @*About Us*@
-    <SfButton @onclick="(e) => OpenDialogAbout(store.Id)" class="btn btn-secondary m-2 col-3"><i class="fa fa-info"></i></SfButton>
-        <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="@IsAboutVisible" AllowPrerender="true" IsModal="true">
-            <DialogTemplates>
-                <Header> About Us </Header>
-                    <Content>
-                        <h3>About Us</h3>
-                            <p>@StDescrition</p>
-                        <h3>Location</h3>
-                            <p>@StAddress</p>
-                    </Content>
-            </DialogTemplates>
-        </SfDialog>
+    <Button @onclick="(e) => OpenDialogAbout(store.Id)" class="btn btn-secondary m-2 col-3"><i class="fa fa-info"></i></Button>
     @*Contact Us*@
-    <SfButton @onclick="(e) => OpenContactDialog(store.Id)" class="btn btn-danger m-2 col-3"><i class="fa fa-phone"></i></SfButton>
-        <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="@IsContactVisible" AllowPrerender="true" IsModal="true">
-            <DialogTemplates>
-                <Header>Contact Us</Header>
-                    <Content>
-                        <h3>Phone #</h3>
-                            <p>@StphoneNo</p>
-                        <h3>Email</h3>
-                            <p>@email</p>
-                        <h3>Location</h3>
-                            <p>@StAddress</p>
-                    </Content>
-            </DialogTemplates>
-        </SfDialog>
+    <Button @onclick="(e) => OpenContactDialog(store.Id)" class="btn btn-danger m-2 col-3"><i class="fa fa-phone"></i></Button>
+
+ 
        </div>         
     @{caresoltag++;}
 </div>} 
@@ -301,8 +280,6 @@
     public string StAddress { get; set; }
     public string StDescrition { get; set; }
     public string email { get; set; }
-    private bool IsAboutVisible { get; set; } = false;
-    private bool IsContactVisible { get; set; } = false;
 
     private async Task OpenDialogAbout(int storeId)
     {
@@ -310,8 +287,18 @@
         StDescrition = storeClicked.Description;
         StAddress = storeClicked.Address;
 
-        this.IsAboutVisible = true;
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                ShowCloseButton = true,
+                Html = $"<strong>Store Info: </strong>{StDescrition}<br><br><strong>Location: </strong> {StAddress}",
+                TitleText = "About Us",
+                ShowCancelButton = true,
+                CancelButtonText = "Cancel",
+                ShowConfirmButton = false,
+                FocusCancel = true
+            });
     }
+
 
 
     private async Task OpenContactDialog(int storeId)
@@ -320,7 +307,17 @@
         StphoneNo = storeClicked.phoneNo;
         StAddress = storeClicked.Address;
         email = await Store.getEmailByUserId(storeClicked.UserId);
-        this.IsContactVisible = true;
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                ShowCloseButton = true,
+                Html = $"<Strong>Phone No: </Strong></h5>{StphoneNo}<br><br><Strong>Email: </Strong>{email}<br><br><Strong>Location: </Strong>{StAddress}",
+
+                TitleText = "Contact Us",
+                ShowCancelButton = true,
+                CancelButtonText = "Cancel",
+                ShowConfirmButton = false,
+                FocusCancel = true
+            });
     }
     //My Code
 
