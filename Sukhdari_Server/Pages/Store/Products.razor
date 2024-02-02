@@ -1,4 +1,5 @@
 ﻿@page "/products"
+@using Serilog
 @layout StoreAdminLayoutT
 @inject IStoreRepo Store
 @inject ICategoryRepo Category
@@ -40,9 +41,12 @@
         <div class="col-md-4">
             <select class="form-control" @onchange="HandleCategoryChange" id="categoryId">
                 <option value="-1" selected>All Categories</option>
-                @foreach (var category in AllCategories)
+                @if(AllCategories != null)
                 {
-                    <option value="@category.Id">@category.Name</option>
+                    foreach (var category in AllCategories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
                 }
             </select>
         </div>
@@ -62,13 +66,13 @@
                             <th scope="col">Price (PKR)</th>
                             <th scope="col">Quantity</th>
                             <th scope="col">Description</th>
-                            @if(Attributes != null && Attributes.Count > 0)
+                            @* @if(Attributes != null && Attributes.Count > 0)
                             {
                                 foreach(var attrib in Attributes)
                                 {
                                     <th scope="col">@attrib.Key</th>
                                 }
-                            }
+                            } *@
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
@@ -86,13 +90,13 @@
                                     <td>@product.Price</td>
                                     <td>@product.Quantity</td>
                                     <td>@product.Description</td>
-                                    @if (Attributes != null && Attributes.Count > 0)
+                                    @* @if (Attributes != null && Attributes.Count > 0)
                                     {
                                         foreach (var attrib in Attributes)
                                         {
                                             <th scope="col">@product.Attributes.FirstOrDefault(i=>i.Key==attrib.Key).Value</th>
                                         }
-                                    }
+                                    } *@
                                     <td class="d-flex align-items-center justify-content-center  flex-column flex-md-row"
                                         style="gap: 0.3rem;">
                                         <a href="@($"/productView/{product.Id}")">
@@ -150,72 +154,120 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-
-        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-
-        if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
+        try
         {
-            Navigator.NavigateTo("/storeNotExist");
-        }
-        else
-        {
-            AllCategories = await Category.GetAllCategories(store.Id);
+            var authState = await AuthenticationState;
 
-            if (!(AllCategories.Any()))
+            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+
+            if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
             {
-                Navigator.NavigateTo("/addCategory");
+                Navigator.NavigateTo("/storeNotExist");
             }
+            else
+            {
+                AllCategories = await Category.GetAllCategories(store.Id);
 
-            AllProducts = await Product.getAllProducts(store.Id);
+                if (!(AllCategories.Any()))
+                {
+                    Navigator.NavigateTo("/addCategory");
+                }
+
+                AllProducts = await Product.getAllProducts(store.Id);
+            }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while loading in Products component\n{ex}\n\n");
+        }
+
     }
 
 
     private string getProductCategoryName(int id)
     {
-        return AllCategories.FirstOrDefault(i => i.Id == id).Name;
+        var prodCat = "";
+        try
+        {
+            prodCat = AllCategories.FirstOrDefault(i => i.Id == id).Name;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing getProductCategoryName function in Products component\n{ex}\n\n");
+        }
+        return prodCat;
     }
 
     protected async void DeleteConfirmation(int id)
     {
-        productId = id;
-        await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        try
+        {
+            productId = id;
+            await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteConfirmation function in Products component\n{ex}\n\n");
+        }
+
     }
     protected async void DeleteProduct(bool isConfirmed)
     {
-        if(isConfirmed)
+        try
         {
-            await Product.deleteProduct(productId);
+            if(isConfirmed)
+            {
+                await Product.deleteProduct(productId);
 
-            Navigator.NavigateTo("/products",true);
-            await JsRuntime.ToastrSuccess("Product Deleted Successfully");
+                Navigator.NavigateTo("/products",true);
+                await JsRuntime.ToastrSuccess("Product Deleted Successfully");
+            }
+            await JsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
+            IsProcessing = false;
         }
-        await JsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
-        IsProcessing = false;
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteProduct function in Products component\n{ex}\n\n");
+        }
+
     }
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        try
         {
-            JsRuntime.InvokeVoidAsync("initializeDataTables");
+            if(firstRender)
+            {
+                JsRuntime.InvokeVoidAsync("initializeDataTables");
+            }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing OnAfterRenderAsync function in Products component\n{ex}\n\n");
+        }
+
         return base.OnAfterRenderAsync(firstRender);
     }
 
     private void HandleCategoryChange(ChangeEventArgs e)
     {
-
-        if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
+        try
         {
-            if(Attributes.Any())
-                Attributes.Clear();
-            if(selectedCategoryId != -1)
+            if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
             {
-                Attributes.AddRange(AllCategories.FirstOrDefault(i => i.Id == selectedCategoryId).Attributes);
+                if(Attributes.Any())
+                    Attributes.Clear();
+                if(selectedCategoryId != -1)
+                {
+                    Attributes.AddRange(AllCategories.FirstOrDefault(i => i.Id == selectedCategoryId).Attributes);
                 
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing HandleCategoryChange function in Products component\n{ex}\n\n");
+        }
+
     }
 
 }

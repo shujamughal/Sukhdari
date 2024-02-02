@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Business
 {
@@ -16,10 +17,13 @@ namespace Business
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
-        public StoreRepo(ApplicationDbContext db, IMapper map)
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public StoreRepo(ApplicationDbContext db, IMapper map, UserManager<IdentityUser> userManager)
         {
             _db = db;
             _mapper = map;
+            _userManager = userManager;
         }
         public async Task<StoreDTO> createStore(StoreDTO store)
         {
@@ -77,6 +81,7 @@ namespace Business
         public async Task<int> deleteStore(int id)
         {
             var store = await _db.Stores.FindAsync(id);
+            var userId = store.UserId;
             if (store != null)
             {
                 var images = _db.storeImages.Where(i => i.StoreId == id).ToList();
@@ -89,6 +94,11 @@ namespace Business
                 }
                 _db.storeImages.RemoveRange(images);
                 _db.Stores.Remove(store);
+                var  user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    await _userManager.DeleteAsync(user);
+                }
                 return await _db.SaveChangesAsync();
             }
             return 0;
@@ -219,9 +229,18 @@ namespace Business
             return email;
         }
 
+        public async Task<List<IdentityUser>> getAllUsers()
+        {
+            var result = _db.Users.ToList();
+            return result;
+        }
 
-
-
+        //public async Task<bool> deleteUserById(string Id)
+        //{
+        //    var user = await _userManager.FindByIdAsync(Id);
+        //    await _userManager.DeleteAsync(user);
+        //    return true;
+        //}
 
 
     }

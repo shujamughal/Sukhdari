@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CurrieTechnologies.Razor.SweetAlert2;
+using Blazored.LocalStorage;
 
 namespace Sukhdari_Client
 {
@@ -23,6 +24,7 @@ namespace Sukhdari_Client
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration.GetValue<string>("BaseApiUrl", "https://localhost:44353/")) });
             builder.Services.AddScoped<IStoreService, StoreService>();
             builder.Services.AddScoped<IUserIpService, UserIpService>();
+            builder.Services.AddBlazoredLocalStorage();
             builder.Services.AddSweetAlert2();
             await builder.Build().RunAsync();
         }

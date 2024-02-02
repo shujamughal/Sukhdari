@@ -1,4 +1,5 @@
 ﻿@page "/category"
+@using Serilog
 @layout StoreAdminLayoutT
 @inject IStoreRepo Store
 @inject IJSRuntime JS
@@ -73,39 +74,71 @@
     int categoryID;
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-        if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
+        try
         {
-            Navigator.NavigateTo("/storeNotExist");
+            var authState = await AuthenticationState;
+            if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
+            {
+                Navigator.NavigateTo("/storeNotExist");
+            }
+            else
+            {
+                var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+                Categories = await CategoryRepo.GetAllCategories(store.Id);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-            Categories = await CategoryRepo.GetAllCategories(store.Id);
+            Log.Error($"Error while loading Category component\n{ex}\n\n");
         }
+
     }
     protected async void DeleteConfirmation(int id)
     {
-        categoryID = id;
-        await JS.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        try
+        {
+            categoryID = id;
+            await JS.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteConfirmation function in Category component\n{ex}\n\n");
+        }
+
     }
     protected async void DeleteCategory(bool isConfirmed)
     {
-        if(isConfirmed)
+        try
         {
-            await CategoryRepo.deleteCategory(categoryID);
+            if(isConfirmed)
+            {
+                await CategoryRepo.deleteCategory(categoryID);
             
-            Navigator.NavigateTo("/category",true);
-            await JS.ToastrSuccess("Category Deleted Successfully");
+                Navigator.NavigateTo("/category",true);
+                await JS.ToastrSuccess("Category Deleted Successfully");
+            }
+            await JS.InvokeVoidAsync("HideDeleteConfirmationModal");
+            IsProcessing = false;
         }
-        await JS.InvokeVoidAsync("HideDeleteConfirmationModal");
-        IsProcessing = false;
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteCategory function in Category component\n{ex}\n\n");
+        }
+
     }
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        try
         {
-            JS.InvokeVoidAsync("CategoryTable");
+            if(firstRender)
+            {
+                JS.InvokeVoidAsync("CategoryTable");
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing OnAfterRendering function in Category component\n{ex}\n\n");
         }
         return base.OnAfterRenderAsync(firstRender);
     }

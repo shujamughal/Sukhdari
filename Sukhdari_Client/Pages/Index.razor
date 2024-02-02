@@ -3,6 +3,7 @@
 @inject IStoreService Store
 @inject IJSRuntime JSRuntime
 @inject SweetAlertService Swal
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject Microsoft.Extensions.Configuration.IConfiguration config
 <div id="carouselDiv" class="row p-0 m-0">
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -178,10 +179,10 @@
                                  {
                                     <div class="carousel-item active">
                                         <img class="card-img-top" src="@image.StoreImageUrl" onerror="@($"this.src = /Images/store.jpg;")" alt="Product image cap" />
-                                        @if (array[store.Id] != null)
+                                        @* @if (array[store.Id] != null)
                                         {
                                             <span class="card-batch">Upto @array[store.Id]%</span>
-                                        }
+                                        } *@
 
                                     </div> 
                                  }
@@ -324,13 +325,29 @@
     public List<string> selectedCountries = new List<string>();
     protected override async Task OnInitializedAsync()
     {
-        Stores = await Store.getAllStores();
-        //AllStores = await Store.getAllStores();
+        Stores = await localStorage.GetItemAsync<IEnumerable<StoreDTO>>("allStores");
+        DateTime? storesCachedDate = await localStorage.GetItemAsync<DateTime?>("allStoresCachedDate");
+
+        double totalCachedHours = 0;
+        if (storesCachedDate is not null)
+        {
+            totalCachedHours = DateTime.UtcNow.Subtract((DateTime)storesCachedDate).TotalHours;
+        }
+
+        if (Stores is null || storesCachedDate is null || totalCachedHours > 24)
+        {
+            Stores = await Store.getAllStores();
+            await localStorage.SetItemAsync("allStores", Stores);
+            await localStorage.SetItemAsync("allStoresCachedDate", DateTime.UtcNow);
+        }
         AllStores = Stores;
         FilteredStores = Stores;
-        AllTags = await Store.getAllStoreTags();
 
-        if(Stores != null && Stores.Any())
+
+        //AllTags = await Store.getAllStoreTags(); --> Now, tags have no significance for now
+
+        //The following code gets the products of each store and then, after iterating each product of every store it is extracting the maximum discount. This is putting a lot of burden so, I commented it out
+        @* if(Stores != null && Stores.Any())
         {
             var storeID = Stores.OrderByDescending(i => i.Id).FirstOrDefault().Id;
             storeID = storeID + 1;
@@ -349,7 +366,7 @@
                 store.maxDiscount = maxDiscount.Value;
                 array[store.Id] = maxDiscount.Value;
             }
-        }
+        } *@
 
 
     }
@@ -437,12 +454,12 @@
             if (SearchTerm == "")
             {
                 FilteredStores = Stores;
-                AllTags = await Store.getAllStoreTags();
+                //AllTags = await Store.getAllStoreTags();
             }
             else
             {
                 FilteredStores = Stores.Where(i => i.Name.ToLower().Contains(SearchTerm.ToLower())).ToList();
-                AllTags = AllTags.Where(i => i.tagName.ToLower().Contains(SearchTerm.ToLower())).ToList();
+                //AllTags = AllTags.Where(i => i.tagName.ToLower().Contains(SearchTerm.ToLower())).ToList();
                 foreach (var tagStore in AllTags)
                 {
                     var store = Stores.FirstOrDefault(i => i.Id == tagStore.storeId);

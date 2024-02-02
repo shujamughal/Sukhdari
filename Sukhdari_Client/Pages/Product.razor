@@ -2,6 +2,7 @@
 @layout StoreLayout
 @inject IStoreService Store
 @inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 
 <div class="col-11 card m-5">
@@ -138,7 +139,22 @@
     public ProductDTO specificProduct { get; set; } = new ProductDTO();
     protected override async Task OnInitializedAsync()
     {
-        specificProduct = await Store.getSpecificProduct(StoreId, Id);
+        specificProduct = await localStorage.GetItemAsync<ProductDTO>($"productsWithID{Id}");
+        DateTime? productCachedDate = await localStorage.GetItemAsync<DateTime?>($"productsWithID{Id}CachedDate");
+
+        double totalCachedHours = 0;
+        if (productCachedDate is not null)
+        {
+            totalCachedHours = DateTime.UtcNow.Subtract((DateTime)productCachedDate).TotalHours;
+        }
+
+        if(specificProduct is null || productCachedDate is null || totalCachedHours > 24)
+        {
+            specificProduct = await Store.getSpecificProduct(StoreId, Id);
+            await localStorage.SetItemAsync($"productsWithID{Id}", specificProduct);
+            await localStorage.SetItemAsync($"productsWithID{Id}CachedDate", DateTime.UtcNow);
+        }
+        
         int categoryID = specificProduct.CategoryId;
         Store.AddCategoryClickCount(categoryID);
         Store.AddProductClickCount(Id);

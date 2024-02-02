@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,24 @@ namespace Sukhdari_Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("logs/appLog-.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            try
+            {
+                Log.Information("The Application is starting\n\n");
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal($"Application terminated unexpectedly\n{ex}\n\n");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

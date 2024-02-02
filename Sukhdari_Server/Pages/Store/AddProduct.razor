@@ -7,6 +7,7 @@
 @inject IProductImageRepo productImageRepo
 @using System.IO
 @using DataAccess.Data;
+@using Serilog
 @using Sukhdari_Server.Service.IService
 @inject IImageUpload imageUplaod
 @inject NavigationManager Navigator
@@ -215,124 +216,143 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-
-        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-        if (store == null)
+        try
         {
-            Navigator.NavigateTo("/storeNotExist");
-        }
-        else
-        {
-            ProductDetails.StoreId = store.Id;
+            var authState = await AuthenticationState;
 
-            Categories = await Category.GetAllCategories(store.Id);
-
-            if (!authState.User.IsInRole(Common.StaticDetails.Role_StoreAdmin))
+            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+            if (store == null)
             {
-                var uri = new Uri(Navigator.Uri);
-                Navigator.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
-            }
-            if (Id != null)
-            {
-                //updating
-                Title = "Update Product";
-                btnName = "Update Product";
-                var product = await Product.GetProduct(Id.Value, ProductDetails.StoreId);
-                if (product.ProductImages != null)
-                {
-                    product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
-                }
-                ProductDetails = product;
+                Navigator.NavigateTo("/storeNotExist");
             }
             else
             {
-                ProductDetails.ImageUrls = new List<string>();
+                ProductDetails.StoreId = store.Id;
+
+                Categories = await Category.GetAllCategories(store.Id);
+
+                if (!authState.User.IsInRole(Common.StaticDetails.Role_StoreAdmin))
+                {
+                    var uri = new Uri(Navigator.Uri);
+                    Navigator.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
+                }
+                if (Id != null)
+                {
+                    //updating
+                    Title = "Update Product";
+                    btnName = "Update Product";
+                    var product = await Product.GetProduct(Id.Value, ProductDetails.StoreId);
+                    if (product.ProductImages != null)
+                    {
+                        product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
+                    }
+                    ProductDetails = product;
+                }
+                else
+                {
+                    ProductDetails.ImageUrls = new List<string>();
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while loading AddProduct component\n{ex}\n\n");
+        }
+
     }
 
     //I am Adding a Code
     private void HandleCategoryChange(ChangeEventArgs e)
     {
-
-        int selectedCategoryId;
-        if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
+        try
         {
-            foreach(var category in Categories)
+            int selectedCategoryId;
+            if (int.TryParse(e.Value.ToString(), out selectedCategoryId))
             {
-                if(category.Id == selectedCategoryId)
+                foreach(var category in Categories)
                 {
-                    Attributes.Clear();
-                    Attributes = category.Attributes;
-                }
-            }
-            if(Attributes!=null)
-            {
-                if (ProductDetails.Attributes != null && ProductDetails.Attributes.Count > 0)
-                {
-                    // var oldAttributes = ProductDetails.Attributes.Where(i => i.Fixed == true).ToList();
-                    // foreach (var attrib in oldAttributes)
-                    // {
-                    //     ProductDetails.Attributes.Remove(attrib);
-                    // }
-                    ProductDetails.Attributes.Clear();
-                }
-                foreach(var attribute in Attributes)
-                {
-
-                    var attrib = new ProductAttributesDTO { Key = attribute.Key, Fixed=true };
-                    if (ProductDetails.Attributes == null)
+                    if(category.Id == selectedCategoryId)
                     {
-                        ProductDetails.Attributes = new List<ProductAttributesDTO>();
-                        ProductDetails.Attributes.Add(attrib);
+                        Attributes.Clear();
+                        Attributes = category.Attributes;
                     }
-                    else
+                }
+                if(Attributes!=null)
+                {
+                    if (ProductDetails.Attributes != null && ProductDetails.Attributes.Count > 0)
                     {
-                        ProductDetails.Attributes.Add(attrib);
+                        ProductDetails.Attributes.Clear();
+                    }
+                    foreach(var attribute in Attributes)
+                    {
+
+                        var attrib = new ProductAttributesDTO { Key = attribute.Key, Fixed=true };
+                        if (ProductDetails.Attributes == null)
+                        {
+                            ProductDetails.Attributes = new List<ProductAttributesDTO>();
+                            ProductDetails.Attributes.Add(attrib);
+                        }
+                        else
+                        {
+                            ProductDetails.Attributes.Add(attrib);
+                        }
                     }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing HandleCategoryChange function in AddProduct component\n{ex}\n\n");
+        }
+
+
     }
     //I am Added Code Above
 
     private async void SaveProduct()
     {
-        AreAllImagesUploaded = false;
-        if (ProductDetails.Id != 0 && Title == "Update Product")
+        try
         {
-            if (DeletedImagesNames != null && DeletedImagesNames.Any())
+            AreAllImagesUploaded = false;
+            if (ProductDetails.Id != 0 && Title == "Update Product")
             {
-                foreach (var deleted in DeletedImagesNames)
+                if (DeletedImagesNames != null && DeletedImagesNames.Any())
                 {
-                    var imageName = deleted.Replace($"{Navigator.BaseUri}ProductImages/", "");
-                    var result = imageUplaod.DeleteImage(imageName);
-                    await productImageRepo.DeleteProductImageByName(deleted);
+                    foreach (var deleted in DeletedImagesNames)
+                    {
+                        var imageName = deleted.Replace($"{Navigator.BaseUri}ProductImages/", "");
+                        var result = imageUplaod.DeleteImage(imageName);
+                        await productImageRepo.DeleteProductImageByName(deleted);
+                    }
                 }
             }
+
+            var newProduct = await Product.createProduct(ProductDetails);
+            if(newProduct == null || ProductDetails.Id ==0 && newProduct == null  )
+            {
+                message = "Product With same name already exist";
+                await JsRuntime.ToastrWarning(message);
+                return;
+            }
+            else if(ProductDetails.Id !=0)
+            {
+                message = "Product Updated Successfully";
+            }
+            else
+            {
+                message = "Product Added Successfully";
+            }
+            await AddProductImage(newProduct);
+            ProductDetails = new ProductDTO();
+            StateHasChanged();
+            Navigator.NavigateTo("/products");
+            await JsRuntime.ToastrSuccess(message);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing SaveProduct function in AddProduct component\n{ex}\n\n");
         }
 
-        var newProduct = await Product.createProduct(ProductDetails);
-        if(newProduct == null || ProductDetails.Id ==0 && newProduct == null  )
-        {
-            message = "Product With same name already exist";
-            await JsRuntime.ToastrWarning(message);
-            return;
-        }
-        else if(ProductDetails.Id !=0)
-        {
-            message = "Product Updated Successfully";
-        }
-        else
-        {
-            message = "Product Added Successfully";
-        }
-        await AddProductImage(newProduct);
-        ProductDetails = new ProductDTO();
-        StateHasChanged();
-        Navigator.NavigateTo("/products");
-        await JsRuntime.ToastrSuccess(message);
     }
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
@@ -380,32 +400,39 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            throw;
+            Log.Error($"Error while executing HandleImageUpload function in AddProduct component\n{ex}\n\n");
         }
     }
 
     private async Task AddProductImage(ProductDTO product)
     {
-        if (ProductDetails.ImageUrls != null && ProductDetails.ImageUrls.Any())
+        try
         {
-            foreach (var image in ProductDetails.ImageUrls)
+            if (ProductDetails.ImageUrls != null && ProductDetails.ImageUrls.Any())
             {
-                if (ProductDetails.ProductImages == null || ProductDetails.ProductImages.Where(x => x.ProductImageUrl == image).Count()
-                == 0)
-
+                foreach (var image in ProductDetails.ImageUrls)
                 {
-                    ProductImage = new ProductImageDTO()
-                        {
-                            ProductId = product.Id,
-                            ProductImageUrl = image
-                        };
-                    await productImageRepo.CreateProductImage(ProductImage);
+                    if (ProductDetails.ProductImages == null || ProductDetails.ProductImages.Where(x => x.ProductImageUrl == image).Count()
+                    == 0)
+
+                    {
+                        ProductImage = new ProductImageDTO()
+                            {
+                                ProductId = product.Id,
+                                ProductImageUrl = image
+                            };
+                        await productImageRepo.CreateProductImage(ProductImage);
+
+                    }
 
                 }
 
             }
 
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing AddProductImage function in AddProduct component\n{ex}\n\n");
         }
 
 
@@ -430,21 +457,30 @@
             ProductDetails.ImageUrls.RemoveAt(imageIndex);
             await JsRuntime.ToastrSuccess("Image Deleted Successfully");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            Log.Error($"Error while executing DeleteImage function in AddProduct component\n{ex}\n\n");
 
         }
     }
     public void AddAttribute()
     {
-        if(ProductDetails.Attributes == null)
+        try
         {
-            ProductDetails.Attributes = new List<ProductAttributesDTO>();
-            ProductDetails.Attributes.Add(new ProductAttributesDTO() {Fixed=false});
+            if(ProductDetails.Attributes == null)
+            {
+                ProductDetails.Attributes = new List<ProductAttributesDTO>();
+                ProductDetails.Attributes.Add(new ProductAttributesDTO() {Fixed=false});
+            }
+            else
+            {
+                ProductDetails.Attributes.Add(new ProductAttributesDTO() { Fixed = false });
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ProductDetails.Attributes.Add(new ProductAttributesDTO() { Fixed = false });
+            Log.Error($"Error while executing AddAttribute function in AddProduct component\n{ex}\n\n");
         }
+
     }
 }

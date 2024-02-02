@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace Business.IRepo
 
         public Task<StoreDTO> getStoreById(int storeId);
         public Task<String> getEmailByUserId(string userId);
+        public Task<List<IdentityUser>> getAllUsers();
+        //public Task<bool> deleteUserById(string Id);
 
     }
 }

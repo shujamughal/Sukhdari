@@ -4,6 +4,7 @@
 @inject IUserIpService userIp
 @inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 
 @*<h1>@ipAddress.IP</h1>
@@ -272,10 +273,27 @@
 
         }
 
-        //await Task.Delay(2000);
-        Products = await Store.GetStoreProducts(Id);
+        Products = await localStorage.GetItemAsync<IEnumerable<ProductDTO>>($"storeProductsWithID{Id}");
+        DateTime? productsCachedDate = await localStorage.GetItemAsync<DateTime?>($"storeProductsWithID{Id}CachedDate");
+        allCategories = await localStorage.GetItemAsync<IEnumerable<CategoryDTO>>($"storeCategoriesWithID{Id}");
+
+        double totalCachedHours = 0;
+        if (productsCachedDate is not null)
+        {
+            totalCachedHours = DateTime.UtcNow.Subtract((DateTime)productsCachedDate).TotalHours;
+        }
+
+        if (Products is null || allCategories is null || productsCachedDate is null || totalCachedHours > 24)
+        {
+            Products = await Store.GetStoreProducts(Id);
+            allCategories = await Store.getStoreCategories(Id);
+            await localStorage.SetItemAsync($"storeProductsWithID{Id}", Products);
+            await localStorage.SetItemAsync($"storeCategoriesWithID{Id}", allCategories);
+            await localStorage.SetItemAsync($"storeProductsWithID{Id}CachedDate", DateTime.UtcNow);
+        }
+        
         FilteredProducts = Products;
-        allCategories = await Store.getStoreCategories(Id);
+        
         Store.AddStoreClickCount(Id);
     }
     public void searchProductResults()

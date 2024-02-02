@@ -1,4 +1,5 @@
 ﻿@page "/storeNotExist"
+@using Serilog
 @layout StoreAdminLayoutT
 
 @inject IStoreRepo Store
@@ -14,13 +15,21 @@
     public Task<AuthenticationState> AuthenticationState { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-
-
-        if (Store.GetStoreByAdminName(authState.User.Identity.Name) != null)
+        try
         {
-            Navigator.NavigateTo("/store/dashboard");
+            var authState = await AuthenticationState;
+
+
+            if (Store.GetStoreByAdminName(authState.User.Identity.Name) != null)
+            {
+                Navigator.NavigateTo("/store/dashboard");
+            }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while loading StoreNotExist component\n{ex}\n\n");
+        }
+
     }
 
 }

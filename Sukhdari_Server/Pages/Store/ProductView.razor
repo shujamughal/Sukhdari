@@ -3,6 +3,7 @@
 @inject IProductRepo Product
 @inject NavigationManager Navigator
 @using System.IO
+@using Serilog
 @using Sukhdari_Server.Service.IService
 @layout StoreAdminLayoutT
 @attribute [Authorize(Roles = Common.StaticDetails.Role_StoreAdmin)]
@@ -141,19 +142,27 @@
     public ProductDTO specificProduct { get; set; } = new ProductDTO();
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-        if (store == null)
+        try
         {
-            Navigator.NavigateTo("/storeNotExist");
+            var authState = await AuthenticationState;
+            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+            if (store == null)
+            {
+                Navigator.NavigateTo("/storeNotExist");
+            }
+            else{
+            var product = await Product.GetProduct(Id, store.Id);
+                    if (product.ProductImages != null)
+                    {
+                        product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
+                    }
+                    specificProduct = product;
+            }
         }
-        else{
-        var product = await Product.GetProduct(Id, store.Id);
-                if (product.ProductImages != null)
-                {
-                    product.ImageUrls = product.ProductImages.Select(i => i.ProductImageUrl).ToList();
-                }
-                specificProduct = product;
+        catch (Exception ex)
+        {
+            Log.Error($"Error while loading ProductView component\n{ex}\n\n");
         }
+
     }
 }

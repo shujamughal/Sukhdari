@@ -1,6 +1,7 @@
 ﻿@page "/createStore"
 @page "/details"
 @layout StoreAdminLayoutT
+@using Serilog
 @using Syncfusion.Blazor.Buttons
 @inject IStoreRepo Store
 @inject ITagTypeRepo TagTypeRepo
@@ -559,52 +560,68 @@
 
     protected override async Task OnInitializedAsync()
     {
-        TagType = await TagTypeRepo.GetAllTagsType();
-        var authState = await AuthenticationState;
-        string adminName = authState.User.Identity.Name;
-        var store = Store.GetStoreByAdminName(adminName);
-        if (store != null)
+        try
         {
-            Title = "Store Details";
-            SubmitBtnTxt = "Update";
-            if (store.StoreImages != null)
+            TagType = await TagTypeRepo.GetAllTagsType();
+            var authState = await AuthenticationState;
+            string adminName = authState.User.Identity.Name;
+            var store = Store.GetStoreByAdminName(adminName);
+            if (store != null)
             {
-                store.ImageUrls = store.StoreImages.Select(i => i.StoreImageUrl).ToList();
+                Title = "Store Details";
+                SubmitBtnTxt = "Update";
+                if (store.StoreImages != null)
+                {
+                    store.ImageUrls = store.StoreImages.Select(i => i.StoreImageUrl).ToList();
+                }
+                isFlag = true;
+                storeTagsID = await StoreTag.getStoreTags(store.Id);
+                foreach (var sTag in storeTagsID)
+                {
+                    var addTag = await TagRepo.getTag(sTag.tagId);
+                    storeTagsName.Add(addTag.Id);
+                }
+                var typeID = TagTypeRepo.GetTagType(store.Type);
+                Tags = await TagRepo.getTypeTags(typeID);
+                StoreDetails = store;
+                StoreDetails.AdminName = authState.User.Identity.Name;
+                //StoreDetails.Description = "Write store description here";
             }
-            isFlag = true;
-            storeTagsID = await StoreTag.getStoreTags(store.Id);
-            foreach(var sTag in storeTagsID)
-            {
-                var addTag = await TagRepo.getTag(sTag.tagId);
-                storeTagsName.Add(addTag.Id);
-            }
-            var typeID = TagTypeRepo.GetTagType(store.Type);
-            Tags = await TagRepo.getTypeTags(typeID);
-            StoreDetails = store;
-            StoreDetails.AdminName = authState.User.Identity.Name;
-            //StoreDetails.Description = "Write store description here";
+            StoreDetails.AdminName = adminName;
         }
-        StoreDetails.AdminName = adminName;
+        catch(Exception ex)
+        {
+            Log.Error($"Error while loading CreateStore component for {SubmitBtnTxt} operation\n{ex}\n\n");
+        }
+
     }
     private async Task AddStoreImage(StoreDTO store)
     {
-        if (StoreDetails.ImageUrls != null && StoreDetails.ImageUrls.Any())
+        try
         {
-            foreach (var image in StoreDetails.ImageUrls)
+            if (StoreDetails.ImageUrls != null && StoreDetails.ImageUrls.Any())
             {
-                if (StoreDetails.StoreImages == null || StoreDetails.StoreImages.Where(x => x.StoreImageUrl == image).Count()
-                == 0)
-
+                foreach (var image in StoreDetails.ImageUrls)
                 {
-                    StoreImage = new StoreImageDTO()
-                        {
-                            StoreId = store.Id,
-                            StoreImageUrl = image
-                        };
-                    await storeImageRepo.CreateStoreImage(StoreImage);
+                    if (StoreDetails.StoreImages == null || StoreDetails.StoreImages.Where(x => x.StoreImageUrl == image).Count()
+                    == 0)
+
+                    {
+                        StoreImage = new StoreImageDTO()
+                            {
+                                StoreId = store.Id,
+                                StoreImageUrl = image
+                            };
+                        await storeImageRepo.CreateStoreImage(StoreImage);
+                    }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing AddStoreImage function in CreateStore component\n{ex}\n\n");
+        }
+
     }
     internal async Task DeleteImage(string imageUrl)
     {
@@ -625,44 +642,46 @@
             StoreDetails.ImageUrls.RemoveAt(imageIndex);
             await JsRuntime.ToastrSuccess("Image Deleted Successfully");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-
+            Log.Error($"Error while executing DeleteImage function in CreateStore component\n{ex}\n\n");
         }
     }
     private async void CreateStoreWithDTO()
     {
-
-        string message = "Store Details Added Successfully";
-        if (StoreDetails.Id != 0 && Title == "Store Details")
+        try
         {
-            if (DeleteImagesName != null && DeleteImagesName.Any())
+            string message = "Store Details Added Successfully";
+            if (StoreDetails.Id != 0 && Title == "Store Details")
             {
-                foreach (var deletedImage in DeleteImagesName)
+                if (DeleteImagesName != null && DeleteImagesName.Any())
                 {
-                    var name = deletedImage.Replace($"{Navigator.BaseUri}ProductImages/", "");
-                    var result = imageUplaod.DeleteImage(name);
-                    await storeImageRepo.DeleteStoreImageByName(deletedImage);
+                    foreach (var deletedImage in DeleteImagesName)
+                    {
+                        var name = deletedImage.Replace($"{Navigator.BaseUri}ProductImages/", "");
+                        var result = imageUplaod.DeleteImage(name);
+                        await storeImageRepo.DeleteStoreImageByName(deletedImage);
+                    }
                 }
+                message = "Store Details Updated";
             }
-            message = "Store Details Updated";
+            var newStore = await Store.createStore(StoreDetails);
+            await AddStoreImage(newStore);
+            var authState = await AuthenticationState;
+            var storeID = Store.GetStoreByAdminName(authState.User.Identity.Name).Id;
+            foreach (var tag in selectedTags)
+            {
+                await StoreTag.AddStoreTag(storeID, tag);
+            }
+            StoreDetails = new StoreDTO();
+            StateHasChanged();
+            Navigator.NavigateTo("/store/dashboard");
+            await JsRuntime.ToastrSuccess(message);
         }
-        var newStore = await Store.createStore(StoreDetails);
-        await AddStoreImage(newStore);
-        var authState = await AuthenticationState;
-        var storeID = Store.GetStoreByAdminName(authState.User.Identity.Name).Id;
-        foreach(var tag in selectedTags)
+        catch (Exception ex)
         {
-            await StoreTag.AddStoreTag(storeID, tag);
+            Log.Error($"Error while executing CreateStoreWithDTO function in CreateStore component\n{ex}\n\n");
         }
-        StoreDetails = new StoreDTO();
-        StateHasChanged();
-        Navigator.NavigateTo("/store/dashboard");
-        await JsRuntime.ToastrSuccess(message);
-        ////var result = await Store.createStore(StoreDetails);
-        ////Navigator.NavigateTo("/store/dashboard");
-
-
     }
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
@@ -707,97 +726,117 @@
 
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw;
+            Log.Error($"Error while executing HandleImageUpload function in CreateStore component\n{ex}\n\n");
         }
     }
     protected async Task CheckStoreAvailability(ChangeEventArgs e)
     {
-        var result = Store.GetStoreByName(Convert.ToString(e.Value));
-        if (result == null)
+        try
         {
-            StoreAvailability = true;
-            ShowButton = false;
+            var result = Store.GetStoreByName(Convert.ToString(e.Value));
+            if (result == null)
+            {
+                StoreAvailability = true;
+                ShowButton = false;
 
+            }
+            else
+            {
+                StoreAvailability = false;
+                ShowButton = true;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            StoreAvailability = false;
-            ShowButton = true;
+
+            Log.Error($"Error while executing CheckStoreAvailability function in CreateStore component\n{ex}\n\n");
         }
+        
     }
     private async Task DoStuff(ChangeEventArgs e)
     {
-        if (e.Value.ToString() != "select_tag")
+        try
         {
-            var selectedString = e.Value.ToString();
-            typeID = Convert.ToInt32(selectedString);
-            Tags = await TagRepo.getTypeTags(typeID);
-            var tagType = TagTypeRepo.GetTagTypeByName(typeID);
-            StoreDetails.Type = tagType;
+            if (e.Value.ToString() != "select_tag")
+            {
+                var selectedString = e.Value.ToString();
+                typeID = Convert.ToInt32(selectedString);
+                Tags = await TagRepo.getTypeTags(typeID);
+                var tagType = TagTypeRepo.GetTagTypeByName(typeID);
+                StoreDetails.Type = tagType;
+            }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DoStuff function in CreateStore component\n{ex}\n\n");
+        }
+        
     }
     public async Task TagboxClicked(TagDTO tagDTO, object checkedValue)
     {
-        if (isFlag)
+        try
         {
-            //if ((bool)checkedValue)
-            //{
-
-            //    await StoreTag.AddStoreTag(StoreDetails.Id, tagDTO.Id);
-
-            //}
-            //else
-            //{
-            //    if (StoreTag.isTagAvailable(tagDTO.Id, StoreDetails.Id))
-            //    {
-            //        await StoreTag.DeleteStoreTag(tagDTO.Id, StoreDetails.Id);
-            //    }
-            //}
-            if ((bool)checkedValue)
+            if (isFlag)
             {
-                if (!selectedTags.Contains(tagDTO.Id))
+                if ((bool)checkedValue)
                 {
-                    selectedTags.Add(tagDTO.Id);
+                    if (!selectedTags.Contains(tagDTO.Id))
+                    {
+                        selectedTags.Add(tagDTO.Id);
+                    }
+                }
+                else
+                {
+                    if (selectedTags.Contains(tagDTO.Id))
+                    {
+                        selectedTags.Remove(tagDTO.Id);
+                    }
                 }
             }
             else
             {
-                if (selectedTags.Contains(tagDTO.Id))
+                if ((bool)checkedValue)
                 {
-                    selectedTags.Remove(tagDTO.Id);
+                    if (!selectedTags.Contains(tagDTO.Id))
+                    {
+                        selectedTags.Add(tagDTO.Id);
+                    }
+                }
+                else
+                {
+                    if (selectedTags.Contains(tagDTO.Id))
+                    {
+                        selectedTags.Remove(tagDTO.Id);
+                    }
                 }
             }
         }
-        else
+        catch (Exception ex)
         {
-            if ((bool)checkedValue)
-            {
-                if (!selectedTags.Contains(tagDTO.Id))
-                {
-                    selectedTags.Add(tagDTO.Id);
-                }
-            }
-            else
-            {
-                if (selectedTags.Contains(tagDTO.Id))
-                {
-                    selectedTags.Remove(tagDTO.Id);
-                }
-            }
+            Log.Error($"Error while executing TagboxClicked function in CreateStore component\n{ex}\n\n");
         }
+
     }
     public void AddAttribute()
     {
-        if (StoreDetails.Attributes == null)
+        try
         {
-            StoreDetails.Attributes = new List<StoreAttributesDTO>();
-            StoreDetails.Attributes.Add(new StoreAttributesDTO());
+            if (StoreDetails.Attributes == null)
+            {
+                StoreDetails.Attributes = new List<StoreAttributesDTO>();
+                StoreDetails.Attributes.Add(new StoreAttributesDTO());
+            }
+            else
+            {
+                StoreDetails.Attributes.Add(new StoreAttributesDTO());
+            }
         }
-        else
+        catch (Exception ex)
         {
-            StoreDetails.Attributes.Add(new StoreAttributesDTO());
+            Log.Error($"Error while executing AddAttribute function in CreateStore component\n{ex}\n\n");
         }
+
     }
 }

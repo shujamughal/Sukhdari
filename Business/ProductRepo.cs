@@ -32,14 +32,15 @@ namespace Business
             if (product.Id != 0)
             {
                 var oldCategory = _db.Products.FirstOrDefault(i => i.Id == product.Id);
-                if (getValues != null && oldCategory.Name.ToLower() == product.Name.ToLower())
-                {
-                    oldCategory.Name = product.Name;
-                }
-                else if(getValues != null && oldCategory.Name.ToLower()!= product.Name.ToLower())
-                {
-                    return null;
-                }
+                //if (getValues != null && oldCategory.Name.ToLower() == product.Name.ToLower())
+                //{
+                //    oldCategory.Name = product.Name;
+                //}
+                //else if(getValues != null && oldCategory.Name.ToLower()!= product.Name.ToLower())
+                //{
+                //    return null;
+                //}
+                oldCategory.Name = product.Name;
                 oldCategory.Price = product.Price;
                 oldCategory.Description = product.Description;
                 oldCategory.CategoryId = product.CategoryId;

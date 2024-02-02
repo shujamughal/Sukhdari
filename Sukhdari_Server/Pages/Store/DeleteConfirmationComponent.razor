@@ -1,4 +1,5 @@
-﻿<div class="modal fade" data-backdrop="static" data-keyboard="false" id="deleteConfirmationModal" tabindex="-1" role="dialog">
+﻿@using Serilog
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="deleteConfirmationModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -45,11 +46,19 @@
 
     protected async Task OnConfirmationChange(bool value)
     {
-        enableDeleteButton = false;
-        if(value)
+        try
         {
-            isProcessing = true;
+            enableDeleteButton = false;
+            if(value)
+            {
+                isProcessing = true;
+            }
+            await CconfirmationChanged.InvokeAsync(value);
         }
-        await CconfirmationChanged.InvokeAsync(value);
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing OnConfirmationChange function in DeleteConfirmationComponent component\n{ex}\n\n");
+        }
+
     }
 }

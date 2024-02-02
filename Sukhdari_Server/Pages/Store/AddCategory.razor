@@ -1,6 +1,7 @@
 ﻿@page "/addCategory"
 @page "/category/update/{Id:int}"
 @page "/category/delete/{Id:int}"
+@using Serilog
 @layout StoreAdminLayoutT
 @inject IStoreRepo Store
 @inject ICategoryRepo Category
@@ -104,86 +105,131 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
+        try
+        {
+            var authState = await AuthenticationState;
 
-        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-        if (store == null)
-        {
-            Navigator.NavigateTo("/storeNotExist");
+            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+            if (store == null)
+            {
+                Navigator.NavigateTo("/storeNotExist");
+            }
+            else
+            {
+                CategoryDetails.StoreId = store.Id;
+                if (!authState.User.IsInRole(Common.StaticDetails.Role_StoreAdmin))
+                {
+                    var uri = new Uri(Navigator.Uri);
+                    Navigator.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
+                }
+                if (Id != null)
+                {
+                    //updating
+                    Title = "Update Category";
+                    btnName = "Update Category";
+                    var category = await Category.GetCategory(Id.Value, CategoryDetails.StoreId);
+                    CategoryDetails = category;
+                }
+            }
         }
-        else
+        catch (Exception ex)
         {
-            CategoryDetails.StoreId = store.Id;
-            if (!authState.User.IsInRole(Common.StaticDetails.Role_StoreAdmin))
-            {
-                var uri = new Uri(Navigator.Uri);
-                Navigator.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
-            }
-            if (Id != null)
-            {
-                //updating
-                Title = "Update Category";
-                btnName = "Update Category";
-                var category = await Category.GetCategory(Id.Value, CategoryDetails.StoreId);
-                CategoryDetails = category;
-            }
+            Log.Error($"Error while loading AddCategory component\n{ex}\n\n");
         }
 
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing OnAfterRenderAsync function in AddCategory component\n{ex}\n\n");
+        }
+
     }
 
     private async void SaveCategory()
     {
-        var ans =  await Category.createCategory(CategoryDetails);
-        string message = "Category Added Successfully";
-        if(ans ==0 && CategoryDetails.Id==0) 
+        try
         {
-            message = "Category with same name already exist";
-            await JsRuntime.ToastrWarning(message);
-            return;
-        }
+            var ans =  await Category.createCategory(CategoryDetails);
+            string message = "Category Added Successfully";
+            if(ans ==0 && CategoryDetails.Id==0) 
+            {
+                message = "Category with same name already exist";
+                await JsRuntime.ToastrWarning(message);
+                return;
+            }
 
-        else if(CategoryDetails.Id !=0)
+            else if(CategoryDetails.Id !=0)
+            {
+                message = "Category Updated Successfully"; 
+            }
+            CategoryDetails.Name = "";
+            CategoryDetails.Description = "";
+            StateHasChanged();
+            Navigator.NavigateTo("/category");
+            await JsRuntime.ToastrSuccess(message);
+        }
+        catch (Exception ex)
         {
-            message = "Category Updated Successfully"; 
+            Log.Error($"Error while executing SaveCategory function in AddCategory component\n{ex}\n\n");
         }
-        CategoryDetails.Name = "";
-        CategoryDetails.Description = "";
-        StateHasChanged();
-        Navigator.NavigateTo("/category");
-        await JsRuntime.ToastrSuccess(message);
-
     }
     private async void DeleteCategory()
     {
-        await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteCategory function in AddCategory component\n{ex}\n\n");
+        }
+
     }
     private async void DeleteCategory2(bool isConfirmed)
     {
-        if (isConfirmed)
+        try
         {
-            await Category.deleteCategory(Id.Value);
-            StateHasChanged();
-            Navigator.NavigateTo("/category");
-            await JsRuntime.ToastrSuccess("Category Deleted Successfully");
+            if (isConfirmed)
+            {
+                await Category.deleteCategory(Id.Value);
+                StateHasChanged();
+                Navigator.NavigateTo("/category");
+                await JsRuntime.ToastrSuccess("Category Deleted Successfully");
+            }
+            await JsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
+            IsProcessing = false;
         }
-        await JsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
-        IsProcessing = false;
+        catch (Exception ex)
+        {
+            Log.Error($"Error while executing DeleteCategory2 function in AddCategory component\n{ex}\n\n");
+        }
+
     } 
 
     public void AddAttribute()
     {
-        if (CategoryDetails.Attributes == null)
+        try
         {
-            CategoryDetails.Attributes = new List<CategoryAttributesDTO>();
-            CategoryDetails.Attributes.Add(new CategoryAttributesDTO());
+            if (CategoryDetails.Attributes == null)
+            {
+                CategoryDetails.Attributes = new List<CategoryAttributesDTO>();
+                CategoryDetails.Attributes.Add(new CategoryAttributesDTO());
+            }
+            else
+            {
+                CategoryDetails.Attributes.Add(new CategoryAttributesDTO());
+            }
         }
-        else
+        catch (Exception ex)
         {
-            CategoryDetails.Attributes.Add(new CategoryAttributesDTO());
+            Log.Error($"Error while executing AddAttribute function in AddCategory component\n{ex}\n\n");
         }
+
     }
 }

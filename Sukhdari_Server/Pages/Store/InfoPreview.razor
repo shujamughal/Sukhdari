@@ -1,4 +1,5 @@
 ﻿@page "/profile"
+@using Serilog
 @layout StoreAdminLayoutT
 @inject IStoreRepo Store
 @inject NavigationManager Navigator
@@ -78,24 +79,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationState;
-
-        var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
-
-        if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
+        try
         {
-            Navigator.NavigateTo("/storeNotExist");
-        }
-        else
-        {
-            StoreDetails = store;
-            StoreAdmin = authState.User.Identity.Name;
-            if (store.StoreImages != null)
+            var authState = await AuthenticationState;
+
+            var store = Store.GetStoreByAdminName(authState.User.Identity.Name);
+
+            if (Store.GetStoreByAdminName(authState.User.Identity.Name) == null)
             {
-                store.ImageUrls = store.StoreImages.Select(i => i.StoreImageUrl).ToList();
+                Navigator.NavigateTo("/storeNotExist");
             }
+            else
+            {
+                StoreDetails = store;
+                StoreAdmin = authState.User.Identity.Name;
+                if (store.StoreImages != null)
+                {
+                    store.ImageUrls = store.StoreImages.Select(i => i.StoreImageUrl).ToList();
+                }
 
+            }
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Error while loading InfoPreview component\n{ex}\n\n");
+        }
+
     }
 
 }

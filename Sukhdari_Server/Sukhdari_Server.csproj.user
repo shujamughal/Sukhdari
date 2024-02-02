@@ -5,6 +5,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
-    <NameOfLastUsedPublishProfile>\\Mac\Home\Documents\FYP\Sukhdari_Server\Properties\PublishProfiles\server.powerlatics.com - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\bilal\OneDrive\Documents\FYP\Sukhdari\Sukhdari_Server\Properties\PublishProfiles\server.powerlatics.pubxml</NameOfLastUsedPublishProfile>
+    <RazorPage_SelectedScaffolderID>RazorComponentScaffolder</RazorPage_SelectedScaffolderID>
+    <RazorPage_SelectedScaffolderCategoryPath>root/Common/RazorComponent</RazorPage_SelectedScaffolderCategoryPath>
   </PropertyGroup>
 </Project>
