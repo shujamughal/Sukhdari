@@ -460,7 +460,7 @@
             {
                 FilteredStores = Stores.Where(i => i.Name.ToLower().Contains(SearchTerm.ToLower())).ToList();
                 //AllTags = AllTags.Where(i => i.tagName.ToLower().Contains(SearchTerm.ToLower())).ToList();
-                foreach (var tagStore in AllTags)
+                @* foreach (var tagStore in AllTags)
                 {
                     var store = Stores.FirstOrDefault(i => i.Id == tagStore.storeId);
                     if (!FilteredStores.Contains(store))
@@ -468,10 +468,10 @@
                         @*IEnumerable<StoreDTO> tag = new List<StoreDTO>();
                         tag = tag.Append(store);
                         List<StoreDTO> stores = new List<StoreDTO>();
-                        stores.Add(store);*@
+                        stores.Add(store);
                         FilteredStores = FilteredStores.Append(store);
                     }
-                }
+                } *@
             }
         }
         else if (selectedFilter == "product")
